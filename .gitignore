@@ -1,21 +1,16 @@
 # ── Données — trop lourdes pour Git ──────────────────────────
-data/sources/
-data/segmentees/
-data/datasets/
-data/cuivre_pdfs_bruts/
-data/manifests/
-data/annotations/
-data/test_llms/
+data/
 
 # ── Modèles entraînés ─────────────────────────────────────────
-modeles/bois_cuivre/*.pth
-modeles/graveur/*.pth
-modeles/themes_iconographiques/*.pth
+modeles/*/*.pth
 
 # ── Résultats volumineux ──────────────────────────────────────
-resultats/similarite/*.html
-resultats/csv
-resultats/similarite/*.pdf
+resultats/similarite/Tableau_html/
+resultats/csv/
+resultats/Validation_cuivre_bois/*/galeries*/
+
+# ── Retours de validation (Céline) ────────────────────────────
+retours_celine/
 
 # ── YOLOv5 — dépendance externe, à cloner séparément ─────────
 yolov5_repo/

@@ -1,5 +1,5 @@
 # Notebooks — Gallica Images / Illustrations Ovide
-**Stage Bnu Strasbourg — Avril 2026**   
+**Stage Bnu Strasbourg — depuis avril 2026**
 **Corpus** : Illustrations des *Métamorphoses* d'Ovide, 16e–17e siècles
 
 ---
@@ -8,13 +8,32 @@
 
 ```
 notebooks/
-├── utils.py                       ← fonctions partagées (importer dans chaque notebook)
-├── 01_documentation_api.ipynb     ← documentation des endpoints de l'API BnF
-├── 02_collecte_similarite.ipynb   ← collecte des résultats via l'API → CSV brut
-├── 03_analyse_tableau.ipynb       ← statistiques + tableau HTML sans IA
-├── 04_dataset_segmentation.ipynb  ← YOLO → illustrations segmentées par source
-├── 05_classification_resnet.ipynb ← fine-tuning ResNet50 → modèle .pth
-└── 06_tableau_enrichi.ipynb       ← application des modèles → tableau HTML final
+├── gallica_utils.py                    ← fonctions partagées (importer dans chaque notebook)
+│
+├── 01_similarite_salomon/              ← recherche par similarité d'image (corpus Salomon)
+│   ├── 01_documentation_api.ipynb      ← documentation des endpoints de l'API BnF
+│   ├── 02_collecte_similarite.ipynb    ← collecte des résultats via l'API → CSV brut
+│   ├── 03_analyse_resultats_bruts.ipynb← statistiques + tableau HTML sans IA
+│   └── 04_similarite_mayence1545.ipynb ← même pipeline appliqué au corpus Wickram/Mayence
+│
+├── 02_classification_bois_cuivre/      ← classifieur ResNet50 bois / cuivre
+│   ├── 01_dataset.ipynb                ← téléchargement, segmentation YOLO, split train/val/test
+│   ├── 02_entrainement_v1_v2.ipynb     ← notebook générique (relancé pour v1 et v2)
+│   ├── 03_entrainement_v3.ipynb        ← entraînement v3 (dataset enrichi, fine-tuning 2 étapes)
+│   ├── 04_application_modeles.ipynb    ← applique v1/v2/v3 aux résultats de similarité → CSV enrichi
+│   ├── 05_validation_experte.ipynb     ← génère les tableaux HTML soumis à Céline Bohnert
+│   └── 06_evaluation_versions.ipynb    ← compare v1/v2/v3 face aux annotations de Céline
+│
+├── 03_classification_graveur/          ← classification par graveur (en cours)
+│   └── 01_dataset.ipynb                ← constitution du dataset par graveur
+│
+├── 04_exploration/                     ← explorations ponctuelles
+│   ├── comparaison_clip_dinov2.ipynb   ← CLIP (API BnF) vs DINOv2 (local)
+│   ├── test_llm_iconographie_claude.ipynb
+│   └── test_llm_iconographie_ollama.ipynb
+│
+└── 05_annexes/                         ← tâches annexes
+    └── recuperation_bsb.ipynb          ← récupération de bibles illustrées BSB/MDZ
 ```
 
 ---
@@ -22,32 +41,35 @@ notebooks/
 ## Ordre d'exécution
 
 ```
-02 → 03                  (analyse et tableau sans IA)
-02 → 04 → 05 → 06        (pipeline complet avec IA)
+Similarité   : 02_collecte_similarite → 03_analyse_resultats_bruts
+Bois/cuivre  : 01_dataset → 02_entrainement_v1_v2 (ou 03_entrainement_v3)
+               → 04_application_modeles → 05_validation_experte → 06_evaluation_versions
+Graveur      : 01_dataset (puis entraînement à écrire)
 ```
 
 ---
 
 ## Pipeline
 
-### utils.py
+### gallica_utils.py
 Toutes les fonctions réutilisables sont centralisées dans `gallica_utils.py`.
-Importer dans chaque notebook avec :
+Importer depuis chaque notebook (profondeur uniforme `notebooks/<axe>/<fichier>.ipynb`) avec :
 ```python
 import sys
 sys.path.insert(0, "..")
-from utils import charger_yolo, segmenter_corpus, charger_resnet, ...
+from gallica_utils import charger_yolo, segmenter_corpus, charger_resnet, ...
 ```
 
-### Ajouter une nouvelle source bois/cuivre (notebook 04)
+### Ajouter une nouvelle source bois/cuivre (02_classification_bois_cuivre/01_dataset.ipynb)
 Appeler `telecharger_pages_iiif()` avec la nouvelle URL manifest puis
 `segmenter_corpus()` avec le dossier de destination — nommer les dossiers
 selon la convention `{classe}_{graveur}_{ville}{année}/`.
 
-### Entraîner une nouvelle version du modèle (notebook 05)
-Changer uniquement `VERSION = "vN"` dans la cellule de configuration.
+### Entraîner une nouvelle version du modèle bois/cuivre
+Changer `VERSION` dans `02_entrainement_v1_v2.ipynb` (entraînement simple), ou dupliquer
+`03_entrainement_v3.ipynb` pour une nouvelle architecture/stratégie d'entraînement.
 
-### Ajouter une version au tableau enrichi (notebook 06)
+### Ajouter une version au tableau enrichi (04_application_modeles.ipynb)
 Ajouter le chemin du nouveau `.pth` dans le dictionnaire `MODELES`.
 Les colonnes et filtres HTML s'ajoutent automatiquement.
 
@@ -55,7 +77,7 @@ Les colonnes et filtres HTML s'ajoutent automatiquement.
 
 ## Modèles de classification bois / cuivre
 
-### Version 1 — `resnet50_bois_cuivre_v1.pth`
+### Version 1 — `resnet50_v1.pth`
 
 | Paramètre | Valeur |
 |---|---|
@@ -65,32 +87,43 @@ Les colonnes et filtres HTML s'ajoutent automatiquement.
 | Split train/val/test | 520 / 111 / 113 |
 | Test accuracy | **100%** |
 
-**Sources bois :** Salomon Lyon 1557 (163), Mayence 1545 (50), BSB 87854 (187)  
-**Sources cuivre :** Munich Paris 1637 (21), 4 PDFs Gallica (323)
-
-**Remarque :** Le 100% sur un petit dataset homogène peut indiquer un surajustement.
-Le modèle a tendance à être très confiant mais moins sensible aux cas limites.
-Appliqué aux 1840 (en prenant que 10 rows) résultats de similarité Salomon → **33 cuivres détectés**.
+**Remarque :** le 100% sur un petit dataset homogène peut indiquer un surajustement.
 
 ---
 
-### Version 2 — `resnet50_bois_cuivre_v2.pth`
+### Version 2 — `resnet50_v2.pth`
 
 | Paramètre | Valeur |
 |---|---|
 | Architecture | ResNet50 fine-tuné (ImageNet → bois/cuivre) |
 | Dataset | 1506 images — 862 bois / 644 cuivre |
-| Data augmentation | Flip horizontal — dossiers `{source}_flip/` |
+| Data augmentation | Flip horizontal |
 | Split train/val/test | 1052 / 112 / 115 |
 | Test accuracy | **98%** |
 
-**Sources bois :** Salomon Lyon 1557 (192), Solis Francfort 1581 (187), Wickram Mayence 1545 (52)  
-**Sources cuivre :** Clein Paris 1637 (18), Crispin de Passe — *Metamorphoseon* (135), Crispin de Passe — *Nasonis* (136), Renouard *traduites* (16), Renouard *traduittes* (17)
+---
 
-**Remarque :** Le 98% sur un dataset plus grand et plus varié est plus fiable que
-le 100% de v1. Les 2 erreurs sont des faux négatifs cuivre — des gravures sur cuivre
-confondues avec du bois. Quand le modèle prédit cuivre, il a toujours raison (précision = 1.00).
+### Version 3 — `resnet50_bois_cuivre_v3.0.0.pth`
 
+| Paramètre | Valeur |
+|---|---|
+| Architecture | ResNet50 — fine-tuning en 2 étapes (couche finale puis réseau complet) |
+| Dataset | 29 éditions, ~2105 illustrations (456 bois / 1649 cuivre) |
+| Data augmentation | Aucune — couleurs et illustrations natives conservées |
+| Split train/val/test | 1473 / 315 / 317 |
+| Test accuracy (set de test) | F1 ≈ 0.888, rappel ≈ 0.982 |
+
+**Comparaison des 3 versions face aux annotations expertes de Céline**
+(résultats de similarité appliqués au corpus Salomon — voir `06_evaluation_versions.ipynb`) :
+
+| Version | Précision cuivre | Cuivres ratés (FN) | Faux cuivres (FP) |
+|---|---|---|---|
+| v1 | 91.3 % | 112 | 14 |
+| v2 | 91.2 % | 148 | 11 |
+| v3 | 78.3 % | 9 | 116 |
+
+**v3 a un bien meilleur rappel (beaucoup moins de cuivres ratés) mais une précision plus
+faible (plus de faux positifs)** que v1/v2 — compromis à surveiller pour une v4.
 
 ---
 
@@ -98,51 +131,29 @@ confondues avec du bois. Quand le modèle prédit cuivre, il a toujours raison (
 
 ```
 data/
-├── images_brutes/                  ← pages originales téléchargées
-│   ├── bois_salomon_lyon1557/
-│   ├── bois_solis_francfort1581/
-│   ├── bois_wickram_mayence1545/
-│   ├── cuivre_clein_paris1637/
-│   └── cuivre_pdf/{edition}/
-│
-├── illustrations_segmentees/       ← illustrations extraites par YOLO
-│   ├── bois_salomon_lyon1557/
-│   ├── bois_salomon_lyon1557_flip/
-│   ├── bois_solis_francfort1581/
-│   ├── bois_solis_francfort1581_flip/
-│   ├── bois_wickram_mayence1545/
-│   ├── bois_wickram_mayence1545_flip/
-│   ├── cuivre_clein_paris1637/
-│   ├── cuivre_clein_paris1637_flip/
-│   └── cuivre_pdf/
-│       ├── cuivre_passe_metamorphoseon/
-│       ├── cuivre_passe_metamorphoseon_flip/
-│       ├── cuivre_passe_nasonis/
-│       ├── cuivre_passe_nasonis_flip/
-│       ├── cuivre_renouard_traduites/
-│       ├── cuivre_renouard_traduites_flip/
-│       ├── cuivre_renouard_traduittes/
-│       └── cuivre_renouard_traduittes_flip/
-│
-├── pdf_cuivre/                     ← PDFs sources (accès restreint sur Gallica)
-└── dataset/
-    ├── bois/                       ← toutes les images bois rassemblées
-    ├── cuivre/                     ← toutes les images cuivre rassemblées
-    ├── train/bois/ train/cuivre/
-    ├── val/bois/   val/cuivre/
-    └── test/bois/  test/cuivre/
+├── bois_cuivre/
+│   ├── sources/                     ← pages brutes téléchargées, par édition
+│   ├── segmentees/                  ← illustrations extraites par YOLO, par édition
+│   └── datasets/                    ← train/val/test pour le classifieur bois/cuivre
+└── bibles_mdz/
+    └── segmentees/                  ← illustrations de bibles BSB/MDZ (recuperation_bsb.ipynb)
 
 modeles/
-├── resnet50_bois_cuivre_v1.pth
-└── resnet50_bois_cuivre_v2.pth
+└── bois_cuivre/
+    ├── resnet50_v1.pth
+    ├── resnet50_v2.pth
+    └── resnet50_bois_cuivre_v3.0.0.pth
 
 resultats/
-├── similarite_salomon_brut.csv
-├── similarite_salomon_enrichi.csv
-├── tableau_similarite_salomon.html          ← sans colonnes IA
-├── tableau_similarite_salomon_enrichi.html  ← avec colonnes IA v1/v2
-├── matrice_confusion_v1.png
-└── matrice_confusion_v2.png
+├── csv/                              ← CSV bruts et enrichis (résultats de similarité, métriques)
+├── similarite/
+│   ├── Tableau_html/                 ← tableaux HTML de résultats de similarité
+│   └── Stats/                        ← figures (corpus similaires, stats globales)
+├── evaluation_modeles/bois_cuivre/   ← courbes, matrices de confusion, historique d'entraînement
+├── Validation_cuivre_bois/
+│   ├── Validation_until_1800/        ← tableau de validation experte (corpus filtré)
+│   └── Validation_complet/           ← tableau de validation experte (corpus complet)
+└── Datavis/                          ← visualisations générales (cartes, métriques comparatives)
 ```
 
 ---
@@ -156,18 +167,11 @@ resultats/
 | Modèle | `seglinglin/Historical-Illustration-Extraction` |
 | Source | Hugging Face — https://huggingface.co/seglinglin/Historical-Illustration-Extraction |
 | Architecture & code | Ultralytics — https://github.com/ultralytics/yolov5 |
-| Poids fine-tunés | seglinglin — https://huggingface.co/seglinglin/Historical-Illustration-Extraction |
-| Entraîné sur | Documents historiques imprimés — manuscrits, livres anciens|
-| Fichier utilisé | `illustration_extraction.pt` |
-
-| Auteur du modèle de base | Glenn Jocher — Ultralytics (YOLOv5) |
-| Papier original YOLO | Redmon et al., *You Only Look Once*, CVPR 2016 |
-| Licence | Publique — Hugging Face |
-
+| Entraîné sur | Documents historiques imprimés — manuscrits, livres anciens |
+| Seuil de confiance | 0.25 |
 
 **Rôle dans le projet :** détecte et découpe les illustrations dans les pages numérisées
-des éditions des *Métamorphoses*. Utilisé avec un seuil de confiance de 0.25 —
-les détections en dessous de ce seuil sont ignorées.
+des éditions des *Métamorphoses*.
 
 **Choix du modèle :** sélectionné empiriquement parmi les modèles disponibles sur
 Hugging Face pour la détection dans les documents historiques. Validé visuellement
@@ -181,23 +185,10 @@ sur les corpus bois et cuivre — aucune évaluation formelle n'a été conduite
 |---|---|
 | Modèle de base | `ResNet50` — poids ImageNet (`ResNet50_Weights.IMAGENET1K_V1`) |
 | Source | torchvision — https://pytorch.org/vision/stable/models/resnet.html |
-| Architecture | Réseau convolutif profond à connexions résiduelles, 50 couches |
-| Pré-entraîné sur | ImageNet — 1,2 million d'images, 1000 classes |
-| Auteurs | He, Zhang, Ren, Sun — Microsoft Research, CVPR 2016 |
-| Poids distribués par | torchvision — Meta AI |
 | Fine-tuning | Couche finale remplacée — `fc(2048 → 2)` — classification binaire |
 
 **Rôle dans le projet :** classifie chaque illustration extraite par YOLO comme
-gravure sur bois ou gravure sur cuivre. Fine-tuné sur notre dataset de gravures
-des *Métamorphoses*.
-
-| Hyperparamètre | Valeur |
-|---|---|
-| Optimiseur | Adam, lr=1e-4 |
-| Scheduler | StepLR — step=5, gamma=0.5 |
-| Loss | CrossEntropyLoss avec class weights |
-| Époques | 20 |
-| Batch size | 16 |
+gravure sur bois ou gravure sur cuivre.
 
 **Choix du modèle :** ResNet50 est un standard établi pour la classification
 d'images. Son pré-entraînement sur ImageNet lui permet d'extraire des
@@ -205,33 +196,24 @@ caractéristiques visuelles génériques — textures, contours, structures —
 directement applicables à la distinction entre les traits fins du burin (cuivre)
 et les lignes plus épaisses de la taille de bois.
 
-**Microsoft Research** → a inventé l'architecture ResNet
-**Meta AI / torchvision** → distribue les poids pré-entraînés qu'on utilise
-
 ---
-
 
 ## Note mémoire GPU
 
-YOLO (notebook 04) et ResNet50 (notebooks 05/06) ne peuvent pas coexister
-en mémoire GPU. Le notebook 04 appelle `liberer_yolo()` en fin d'exécution.
-Si une erreur OOM (*Out Of Memory* lancé par PyTorch) survient dans 05 ou 06, faire **Kernel → Restart**.
+YOLO (`01_dataset.ipynb`) et ResNet50 (`02/03_entrainement_*.ipynb`, `04_application_modeles.ipynb`)
+ne peuvent pas coexister en mémoire GPU. Appeler `liberer_yolo()` en fin de segmentation.
+Si une erreur OOM (*Out Of Memory*) survient, faire **Kernel → Restart**.
 
 ---
 
-## Sources bibliographiques
+## Sources bibliographiques (classification bois/cuivre, v1/v2)
 
 | Dossier | ARK | Lieu & Date | Graveur | Technique |
 |---|---|---|---|---|
-| `bois_salomon_lyon1557` | `btv1b2200047r` | Lyon, 1557 | Bernard Salomon | bois |
-| `bois_wickram_mayence1545` | `bsb10139926` | Mayence, 1545 | Jörg Wickram | bois |
-| `bois_solis_francfort1581` | `bsb00087854` | Francfort, 1581 | Virgil Solis | bois |
-| `cuivre_clein_paris1637` | `bsb10863401` | Paris, 1637 | Clein & Savery | cuivre |
-| `cuivre_passe_metamorphoseon` | `bpt6k15218623` | — | Crispin de Passe | cuivre |
-| `cuivre_passe_nasonis` | `bpt6k1522448r` | — | Crispin de Passe | cuivre |
-| `cuivre_renouard_traduites` | `bpt6k6277348n` | — | non renseigné | cuivre |
-| `cuivre_renouard_traduittes` | `bpt6k722055` | — | non renseigné | cuivre |
+| `bois_salomon_rouille_lyon1557` | `btv1b2200047r` | Lyon, 1557 | Bernard Salomon | bois |
+| `bois_wickram_behem_mayence1545` | `bsb10139926` | Mayence, 1545 | Jörg Wickram | bois |
+| `bois_solis_feyerabend_francfort1581` | `bsb00087854` | Francfort, 1581 | Virgil Solis | bois |
+| `cuivre_savery_farnaby_paris1637` | `bsb10863401` | Paris, 1637 | Clein & Savery | cuivre |
 
-> Les ARKs `bpt6k*` correspondent à des PDFs téléchargés manuellement depuis Gallica —
-> ces documents ont un accès IIIF restreint (HTTP 403) et ne sont pas indexés
-> dans l'API Fouille d'image BnF.
+> Le dataset v3 reprend ces 4 sources et les étend à 29 éditions au total
+> (voir `03_entrainement_v3.ipynb`, dictionnaire `SOURCES`).
