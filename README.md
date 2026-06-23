@@ -22,23 +22,6 @@ anciennes des *Métamorphoses* d'Ovide, à l'aide d'outils de vision par ordinat
 | **Classification par graveur** | En cours | Constitution du jeu de données ; entraînement non encore réalisé |
 | **Explorations complémentaires** | Exploratoire | Comparaison CLIP / DINOv2, description iconographique par LLM (Claude / Ollama), récupération de corpus BSB |
 
-## Résultats clés (classification bois/cuivre)
-
-Trois versions du classifieur ResNet50 ont été entraînées sur des jeux de données
-croissants (v1 : 744 images → v3 : dataset enrichi à 29 éditions). Validation contre
-les annotations expertes de Céline sur les résultats de similarité appliqués au
-corpus Salomon :
-
-| Version | Précision cuivre | Cuivres ratés (faux négatifs) | Faux cuivres (faux positifs) |
-|---|---|---|---|
-| v1 | 91.3 % | 112 | 14 |
-| v2 | 91.2 % | 148 | 11 |
-| v3 | 78.3 % | 9 | 116 |
-
-**v3 détecte beaucoup plus de cuivres (meilleur rappel) mais au prix d'une précision
-plus faible** — compromis précision/rappel à surveiller pour les prochaines versions.
-Détail des calculs : [notebooks/modeles/bois_cuivre/stats.ipynb](notebooks/modeles/bois_cuivre/stats.ipynb).
-
 ## Structure du dépôt
 
 ```
