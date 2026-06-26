@@ -206,14 +206,4 @@ Si une erreur OOM (*Out Of Memory*) survient, faire **Kernel → Restart**.
 
 ---
 
-## Sources bibliographiques (classification bois/cuivre, v1/v2)
 
-| Dossier | ARK | Lieu & Date | Graveur | Technique |
-|---|---|---|---|---|
-| `bois_salomon_rouille_lyon1557` | `btv1b2200047r` | Lyon, 1557 | Bernard Salomon | bois |
-| `bois_wickram_behem_mayence1545` | `bsb10139926` | Mayence, 1545 | Jörg Wickram | bois |
-| `bois_solis_feyerabend_francfort1581` | `bsb00087854` | Francfort, 1581 | Virgil Solis | bois |
-| `cuivre_savery_farnaby_paris1637` | `bsb10863401` | Paris, 1637 | Clein & Savery | cuivre |
-
-> Le dataset v3 reprend ces 4 sources et les étend à 29 éditions au total
-> (voir `03_entrainement_v3.ipynb`, dictionnaire `SOURCES`).
