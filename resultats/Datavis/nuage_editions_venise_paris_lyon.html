@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="fr"><head><meta charset="utf-8">
+<title>Nuage de points : éditions de Venise, Paris et Lyon</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+  :root {
+    --surface: #fffaf0; --texte-fort: #2b1e15; --texte-att: #6b5c4f; --trait: #d8cfc0;
+    --contour-point: #3e2c23;
+    --c-bois: #2a78d6; --c-cuivre: #1baf7a; --c-inconnue: #9a9993;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --surface: #1a1a19; --texte-fort: #f2ece2; --texte-att: #c3baa9; --trait: #3a352c;
+      --contour-point: #f2ece2;
+      --c-bois: #3987e5; --c-cuivre: #199e70; --c-inconnue: #8a8983;
+    }
+  }
+  body { margin:0; font-family:Georgia,serif; background:var(--surface); color:var(--texte-fort); }
+  .page { max-width:1100px; margin:0 auto; padding:16px 20px 32px; position:relative; }
+  h1 { font-size:19px; margin:0 0 4px; }
+  p.souschapo { font-size:13px; color:var(--texte-att); margin:0 0 14px; }
+  .legende { display:flex; gap:18px; flex-wrap:wrap; font-size:12px; margin:0 0 6px; }
+  .legende .item { display:flex; align-items:center; gap:6px; }
+  .legende .puce { width:11px; height:11px; border-radius:50%; border:1px solid var(--contour-point); }
+
+  /* Colonne de gauche = cartes, colonne de droite = frises ; le bouton et le tableau de
+     chaque ville s'étendent sur les 2 colonnes, juste sous sa paire carte/frise. */
+  .rangee-cartes { display:grid; grid-template-columns:3fr 2fr; align-items:center;
+    gap:8px 20px; margin-top:14px; }
+  @media (max-width:760px) { .rangee-cartes { grid-template-columns:1fr; } }
+  .cellule-carte h2 { font-size:15px; margin:0 0 6px; color:var(--texte-fort); }
+  .carte { height:300px; border-radius:6px; box-shadow:0 1px 6px rgba(0,0,0,.25); }
+
+  .panneau-frise { background:var(--surface); border:1px solid var(--trait); border-radius:6px;
+    box-shadow:0 1px 6px rgba(0,0,0,.15); padding:6px 6px 2px; }
+  .frise { width:100%; height:auto; overflow:visible; display:block; }
+  .ligne-base { stroke:var(--texte-att); stroke-width:1.5; }
+  .pointe-base { fill:var(--texte-att); }
+  .grille-frise { stroke:var(--trait); stroke-width:1; }
+  .tick-frise { stroke:var(--texte-att); stroke-width:1; }
+  .etiquette-annee-frise { font-size:10px; fill:var(--texte-att); }
+  .point-frise { stroke:var(--contour-point); stroke-width:1.2; fill-opacity:.9; cursor:pointer;
+    transition:r .15s; filter:drop-shadow(0 1px 1px rgba(0,0,0,.35)); }
+  .point-frise:hover, .point-frise.actif { r:8; fill-opacity:1; }
+
+  .action-ville { grid-column:1 / -1; justify-self:start; margin:2px 0 0; }
+  button.bascule { font-family:Georgia,serif; font-size:12px; background:none;
+    border:1px solid var(--trait); color:var(--texte-fort); border-radius:4px; padding:5px 10px;
+    cursor:pointer; }
+  table.tableau-detaille { grid-column:1 / -1; width:100%; border-collapse:collapse;
+    font-size:12px; margin:2px 0 6px; display:none; }
+  table.tableau-detaille.visible { display:table; }
+  table.tableau-detaille th, table.tableau-detaille td { text-align:left; padding:4px 8px;
+    border-bottom:1px solid var(--trait); }
+  table.tableau-detaille a { color:var(--c-bois); }
+
+  .leaflet-tooltip { font-family:Georgia,serif; font-size:12px; background:var(--surface);
+    border:1px solid var(--contour-point); color:var(--texte-fort); padding:4px 9px;
+    box-shadow:0 1px 5px rgba(0,0,0,.3); }
+  .infobulle { position:absolute; pointer-events:none; background:var(--surface);
+    border:1px solid var(--contour-point); border-radius:5px; padding:6px 10px; font-size:12px;
+    max-width:260px; opacity:0; transition:opacity .1s; box-shadow:0 2px 8px rgba(0,0,0,.3); z-index:2000; }
+</style></head><body>
+<div class="page">
+  <h1>Éditions de Venise, Paris et Lyon</h1>
+  <p class="souschapo">Un point = une édition connue, disposée en spirale autour de sa ville
+    sur la carte (à gauche), et par année sur sa frise (à droite). Couleur = technique de gravure.</p>
+  <div class="legende" id="legende"></div>
+  <div class="rangee-cartes">
+    <div class="cellule-carte"><h2>Lyon</h2><div class="carte" id="carte-Lyon"></div></div>
+<div class="panneau-frise"><svg class="frise" viewBox="0 0 320 130">
+    <line x1="12.0" y1="61.0" x2="304.0" y2="61.0" class="ligne-base"/>
+<path d="M 303.0 57.0 L 310.0 61.0 L 303.0 65.0 Z" class="pointe-base"/>
+<line x1="23.2" y1="18" x2="23.2" y2="104.0" class="grille-frise"/>
+<line x1="23.2" y1="57.0" x2="23.2" y2="65.0" class="tick-frise"/>
+<text x="23.2" y="120.0" text-anchor="middle" class="etiquette-annee-frise">1500</text>
+<line x1="135.5" y1="18" x2="135.5" y2="104.0" class="grille-frise"/>
+<line x1="135.5" y1="57.0" x2="135.5" y2="65.0" class="tick-frise"/>
+<text x="135.5" y="120.0" text-anchor="middle" class="etiquette-annee-frise">1600</text>
+<line x1="247.8" y1="18" x2="247.8" y2="104.0" class="grille-frise"/>
+<line x1="247.8" y1="57.0" x2="247.8" y2="65.0" class="tick-frise"/>
+<text x="247.8" y="120.0" text-anchor="middle" class="etiquette-annee-frise">1700</text>
+    <circle class="point-frise" data-i="43" cx="34.5" cy="24.5" r="5" fill="var(--c-bois)"/>
+<circle class="point-frise" data-i="44" cx="35.6" cy="48.8" r="5" fill="var(--c-bois)"/>
+<circle class="point-frise" data-i="45" cx="41.2" cy="73.2" r="5" fill="var(--c-bois)"/>
+<circle class="point-frise" data-i="46" cx="43.4" cy="97.5" r="5" fill="var(--c-bois)"/>
+<circle class="point-frise" data-i="47" cx="44.6" cy="24.5" r="5" fill="var(--c-bois)"/>
+<circle class="point-frise" data-i="48" cx="53.6" cy="42.7" r="5" fill="var(--c-bois)"/>
+<circle class="point-frise" data-i="49" cx="53.6" cy="61.0" r="5" fill="var(--c-bois)"/>
+<circle class="point-frise" data-i="50" cx="54.7" cy="79.3" r="5" fill="var(--c-bois)"/>
+<circle class="point-frise" data-i="51" cx="59.2" cy="97.5" r="5" fill="var(--c-bois)"/>
+<circle class="point-frise" data-i="52" cx="70.4" cy="61.0" r="5" fill="var(--c-bois)"/>
+<circle class="point-frise" data-i="53" cx="86.1" cy="24.5" r="5" fill="var(--c-bois)"/>
+<circle class="point-frise" data-i="54" cx="86.1" cy="42.7" r="5" fill="var(--c-bois)"/>
+<circle class="point-frise" data-i="55" cx="87.2" cy="61.0" r="5" fill="var(--c-bois)"/>
+<circle class="point-frise" data-i="56" cx="87.2" cy="79.3" r="5" fill="var(--c-bois)"/>
+<circle class="point-frise" data-i="57" cx="89.5" cy="97.5" r="5" fill="var(--c-bois)"/>
+<circle class="point-frise" data-i="58" cx="95.1" cy="61.0" r="5" fill="var(--c-bois)"/>
+<circle class="point-frise" data-i="59" cx="117.6" cy="61.0" r="5" fill="var(--c-bois)"/>
+<circle class="point-frise" data-i="60" cx="167.0" cy="61.0" r="5" fill="var(--c-cuivre)"/>
+<circle class="point-frise" data-i="61" cx="244.5" cy="36.0" r="5" fill="var(--c-cuivre)"/>
+<circle class="point-frise" data-i="62" cx="244.5" cy="61.0" r="5" fill="var(--c-cuivre)"/>
+<circle class="point-frise" data-i="63" cx="244.5" cy="86.0" r="5" fill="var(--c-cuivre)"/>
+  </svg></div>
+<button class="bascule action-ville" data-ville="Lyon">Afficher le tableau détaillé</button>
+<table class="tableau-detaille" id="tableau-Lyon">
+    <thead><tr><th>Année</th><th>Titre</th><th>Technique</th><th>Graveur</th><th>Lien</th></tr></thead>
+    <tbody>
+      <tr><td>1510</td><td>P. Ovidii Nasonis Metamorphoseos libri moralizati</td><td>Bois</td><td>Leroy II, Guillaume</td><td><a href="https://gallica.bnf.fr/ark:/12148/bpt6k87102394" target="_blank">voir</a></td></tr>
+<tr><td>1511</td><td>P. Ovidii Nasonis Metamorphoseos libri moralizati</td><td>Bois</td><td>Anonyme1511</td><td><a href="https://www.digitale-sammlungen.de/en/view/bsb11913472?page=,1" target="_blank">voir</a></td></tr>
+<tr><td>1516</td><td>P. Ovidii Nasonis Metamorphoseos libri moralizati</td><td>Bois</td><td>Leroy II, Guillaume</td><td><a href="http://www.ovidiuspictus.es/en/visualizacionejemplar.php?clave=146;?%3E" target="_blank">voir</a></td></tr>
+<tr><td>1518</td><td>P. Ovidii Nasonis Metamorphoseos libri moralizati</td><td>Bois</td><td>Leroy II, Guillaume</td><td><a href="https://www.digitale-sammlungen.de/en/view/bsb10198256?page=,1" target="_blank">voir</a></td></tr>
+<tr><td>1519</td><td>P. Ovidii Nasonis Metamorphoseos libri moralizati</td><td>Bois</td><td>Leroy II, Guillaume</td><td><a href="https://gallica.bnf.fr/ark:/12148/bpt6k87093449" target="_blank">voir</a></td></tr>
+<tr><td>1527</td><td>Publii Ovidii Nasonis Sulmonensis Metamorphoseos Librorum xv</td><td>Bois</td><td>Anonyme1527</td><td><a href="https://babel.hathitrust.org/cgi/pt?id=ucm.5327231213&seq=1" target="_blank">voir</a></td></tr>
+<tr><td>1527</td><td>Publii Ouidii Nasonis Sulmonensis Metamorphoseos Librorum XV</td><td>Bois</td><td>Leroy II, Guillaume</td><td><a href="http://www.ovidiuspictus.es/en/visualizacionejemplar.php?clave=106" target="_blank">voir</a></td></tr>
+<tr><td>1528</td><td>Textus Ovidii Metamorpho. Lib. XV</td><td>Bois</td><td>Anonyme1527</td><td><a href="http://www.ovidiuspictus.es/en/visualizacionejemplar.php?clave=150" target="_blank">voir</a></td></tr>
+<tr><td>1532</td><td>Le Grand Olympe</td><td>Bois</td><td>Anonyme1532</td><td><a href="https://gallica.bnf.fr/ark:/12148/btv1b8600297j" target="_blank">voir</a></td></tr>
+<tr><td>1542</td><td>P. Ovidii Nasonis Metamorphoseon, hoc est Transformationum, libri XV</td><td>Bois</td><td>Anonyme1532</td><td><a href="http://www.ovidiuspictus.es/en/visualizacionejemplar.php?clave=149" target="_blank">voir</a></td></tr>
+<tr><td>1556</td><td>Trois Premiers livres de la Métamorphose d'Ovide</td><td>Bois</td><td>Eskrich, Pierre</td><td><a href="https://gallica.bnf.fr/ark:/12148/btv1b22000559" target="_blank">voir</a></td></tr>
+<tr><td>1556</td><td>Trois Premiers livres de la Métamorphose d'Ovide</td><td>Bois</td><td>Eskrich, Pierre</td><td><a href="https://gallica.bnf.fr/ark:/12148/bpt6k8709995p" target="_blank">voir</a></td></tr>
+<tr><td>1557</td><td>La Metamorphose figurée</td><td>Bois</td><td>Salomon, Bernard</td><td><a href="https://gallica.bnf.fr/ark:/12148/btv1b2200047r" target="_blank">voir</a></td></tr>
+<tr><td>1557</td><td>Excellente figueren</td><td>Bois</td><td>Salomon, Bernard</td><td><a href="https://books.google.fr/books?id=izdoAAAAcAAJ&printsec=frontcover&hl=fr&source=gbs_ge_summary_r&cad=0#v=onepage&q&f=false" target="_blank">voir</a></td></tr>
+<tr><td>1559</td><td>La vita et metamorfoseo d'Ovidio</td><td>Bois</td><td>Salomon, Bernard</td><td><a href="https://gallica.bnf.fr/ark:/12148/btv1b22000485" target="_blank">voir</a></td></tr>
+<tr><td>1564</td><td>La Metamorphose figurée</td><td>Bois</td><td>Salomon, Bernard</td><td><a href="https://gallica.bnf.fr/ark:/12148/bpt6k8701267g" target="_blank">voir</a></td></tr>
+<tr><td>1584</td><td>La vita et metamorfoseo d'Ovidio</td><td>Bois</td><td>Salomon, Bernard</td><td><a href="https://gallica.bnf.fr/ark:/12148/bpt6k8708126c" target="_blank">voir</a></td></tr>
+<tr><td>1628</td><td>Les Metamorphoses d´Ovide de nouveau traduites en françois</td><td>Cuivre</td><td>Briot, Isaac</td><td><a href="https://gallica.bnf.fr/ark:/12148/bpt6k6262846q" target="_blank">voir</a></td></tr>
+<tr><td>1697</td><td>Les Oeuvres d’Ovide par Monsieur de Martignac</td><td>Cuivre</td><td>monogrammiste H.T.</td><td><a href="http://www.ovidiuspictus.es/en/listadoejemplares.php?de=edicion&clave=30" target="_blank">voir</a></td></tr>
+<tr><td>1697</td><td>Les Oeuvres d’Ovide par Monsieur de Martignac</td><td>Cuivre</td><td>monogrammiste H.T.</td><td><a href="http://www.ovidiuspictus.es/en/listadoejemplares.php?de=edicion&clave=31" target="_blank">voir</a></td></tr>
+<tr><td>1697</td><td>Les Oeuvres d’Ovide par Monsieur de Martignac</td><td>Cuivre</td><td>monogrammiste H.T.</td><td><a href="https://babel.hathitrust.org/cgi/pt?id=ucm.5323841268&seq=7" target="_blank">voir</a></td></tr>
+    </tbody>
+  </table>
+<div class="cellule-carte"><h2>Paris</h2><div class="carte" id="carte-Paris"></div></div>
+<div class="panneau-frise"><svg class="frise" viewBox="0 0 320 130">
+    <line x1="12.0" y1="61.0" x2="304.0" y2="61.0" class="ligne-base"/>
+<path d="M 303.0 57.0 L 310.0 61.0 L 303.0 65.0 Z" class="pointe-base"/>
+<line x1="23.2" y1="18" x2="23.2" y2="104.0" class="grille-frise"/>
+<line x1="23.2" y1="57.0" x2="23.2" y2="65.0" class="tick-frise"/>
+<text x="23.2" y="120.0" text-anchor="middle" class="etiquette-annee-frise">1500</text>
+<line x1="135.5" y1="18" x2="135.5" y2="104.0" class="grille-frise"/>
+<line x1="135.5" y1="57.0" x2="135.5" y2="65.0" class="tick-frise"/>
+<text x="135.5" y="120.0" text-anchor="middle" class="etiquette-annee-frise">1600</text>
+<line x1="247.8" y1="18" x2="247.8" y2="104.0" class="grille-frise"/>
+<line x1="247.8" y1="57.0" x2="247.8" y2="65.0" class="tick-frise"/>
+<text x="247.8" y="120.0" text-anchor="middle" class="etiquette-annee-frise">1700</text>
+    <circle class="point-frise" data-i="0" cx="15.4" cy="36.0" r="5" fill="var(--c-bois)"/>
+<circle class="point-frise" data-i="1" cx="18.7" cy="61.0" r="5" fill="var(--c-bois)"/>
+<circle class="point-frise" data-i="2" cx="22.1" cy="86.0" r="5" fill="var(--c-bois)"/>
+<circle class="point-frise" data-i="3" cx="67.0" cy="61.0" r="5" fill="var(--c-bois)"/>
+<circle class="point-frise" data-i="4" cx="101.8" cy="24.5" r="5" fill="var(--c-bois)"/>
+<circle class="point-frise" data-i="5" cx="101.8" cy="48.8" r="5" fill="var(--c-bois)"/>
+<circle class="point-frise" data-i="6" cx="106.3" cy="73.2" r="5" fill="var(--c-bois)"/>
+<circle class="point-frise" data-i="7" cx="106.3" cy="97.5" r="5" fill="var(--c-bois)"/>
+<circle class="point-frise" data-i="8" cx="108.6" cy="48.5" r="5" fill="var(--c-bois)"/>
+<circle class="point-frise" data-i="9" cx="116.4" cy="73.5" r="5" fill="var(--c-bois)"/>
+<circle class="point-frise" data-i="10" cx="142.3" cy="24.5" r="5" fill="var(--c-cuivre)"/>
+<circle class="point-frise" data-i="11" cx="146.8" cy="42.7" r="5" fill="var(--c-cuivre)"/>
+<circle class="point-frise" data-i="12" cx="151.3" cy="61.0" r="5" fill="var(--c-cuivre)"/>
+<circle class="point-frise" data-i="13" cx="153.5" cy="79.3" r="5" fill="var(--c-cuivre)"/>
+<circle class="point-frise" data-i="14" cx="154.6" cy="97.5" r="5" fill="var(--c-cuivre)"/>
+<circle class="point-frise" data-i="15" cx="156.9" cy="36.0" r="5" fill="var(--c-cuivre)"/>
+<circle class="point-frise" data-i="16" cx="159.1" cy="61.0" r="5" fill="var(--c-inconnue)"/>
+<circle class="point-frise" data-i="17" cx="159.1" cy="86.0" r="5" fill="var(--c-cuivre)"/>
+<circle class="point-frise" data-i="18" cx="177.1" cy="48.5" r="5" fill="var(--c-cuivre)"/>
+<circle class="point-frise" data-i="19" cx="177.1" cy="73.5" r="5" fill="var(--c-cuivre)"/>
+<circle class="point-frise" data-i="20" cx="202.9" cy="61.0" r="5" fill="var(--c-cuivre)"/>
+<circle class="point-frise" data-i="21" cx="213.0" cy="61.0" r="5" fill="var(--c-cuivre)"/>
+<circle class="point-frise" data-i="22" cx="220.9" cy="48.5" r="5" fill="var(--c-inconnue)"/>
+<circle class="point-frise" data-i="23" cx="220.9" cy="73.5" r="5" fill="var(--c-cuivre)"/>
+<circle class="point-frise" data-i="24" cx="289.4" cy="61.0" r="5" fill="var(--c-cuivre)"/>
+  </svg></div>
+<button class="bascule action-ville" data-ville="Paris">Afficher le tableau détaillé</button>
+<table class="tableau-detaille" id="tableau-Paris">
+    <thead><tr><th>Année</th><th>Titre</th><th>Technique</th><th>Graveur</th><th>Lien</th></tr></thead>
+    <tbody>
+      <tr><td>1493</td><td>La Bible des Poètes</td><td>Bois</td><td>Anonyme1493</td><td><a href="https://gallica.bnf.fr/ark:/12148/bpt6k5340318j" target="_blank">voir</a></td></tr>
+<tr><td>1496</td><td>Ovidius Metamorphoseos cum commento familiari</td><td>Bois</td><td>Anonyme1493</td><td><a href="https://gallica.bnf.fr/ark:/12148/bpt6k8710229r/f14.item" target="_blank">voir</a></td></tr>
+<tr><td>1499</td><td>Methamorphoze</td><td>Bois</td><td>Anonyme1493</td><td><a href="https://gallica.bnf.fr/ark:/12148/btv1b2200019f" target="_blank">voir</a></td></tr>
+<tr><td>1539</td><td>Les XV. liures de la Metamorphose d'Ovide</td><td>Bois</td><td>Anonyme1539</td><td><a href="https://babel.hathitrust.org/cgi/pt?id=gri.ark:/13960/t6qz73288&seq=1" target="_blank">voir</a></td></tr>
+<tr><td>1570</td><td>Olympe des histoires poëtiques</td><td>Bois</td><td>Anonyme1570</td><td><a href="https://gallica.bnf.fr/ark:/12148/bpt6k87012662" target="_blank">voir</a></td></tr>
+<tr><td>1570</td><td>Metamorphoses Ovidii</td><td>Bois</td><td>Salomon, Bernard</td><td><a href="https://gallica.bnf.fr/ark:/12148/bpt6k8708104s" target="_blank">voir</a></td></tr>
+<tr><td>1574</td><td>Olympe des histoires poétiques</td><td>Bois</td><td>Salomon, Bernard</td><td><a href="https://gallica.bnf.fr/ark:/12148/bpt6k8710284z/f1.planchecontact" target="_blank">voir</a></td></tr>
+<tr><td>1574</td><td>Pub. Ovidii Nasonis Metamorphoseon libri XV</td><td>Bois</td><td>Salomon, Bernard</td><td><a href="https://gallica.bnf.fr/ark:/12148/bpt6k87081056" target="_blank">voir</a></td></tr>
+<tr><td>1576</td><td>Pub. Ovidii Nasonis Metamorphoseon libri XV</td><td>Bois</td><td>Salomon, Bernard</td><td><a href="https://gallica.bnf.fr/ark:/12148/bpt6k87081056" target="_blank">voir</a></td></tr>
+<tr><td>1583</td><td>Metamorphoses Ovidii… per Sprengium</td><td>Bois</td><td>Salomon, Bernard</td><td><a href="https://gallica.bnf.fr/ark:/12148/bpt6k87079136" target="_blank">voir</a></td></tr>
+<tr><td>1606</td><td>Les Metamorphoses d´Ovide de nouveau traduites en françois</td><td>Cuivre</td><td>Gaultier, Léonard</td><td><a href="http://www.ovidiuspictus.es/en/visualizacionejemplar.php?clave=47" target="_blank">voir</a></td></tr>
+<tr><td>1610</td><td>Les Metamorphoses d´Ovide de nouveau traduites en françois</td><td>Cuivre</td><td>Gaultier, Léonard</td><td><a href="https://www.digitale-sammlungen.de/en/view/bsb11913284" target="_blank">voir</a></td></tr>
+<tr><td>1614</td><td>Les Metamorphoses d´Ovide de nouveau traduites en françois</td><td>Cuivre</td><td>Gaultier, Léonard</td><td><a href="https://gallica.bnf.fr/ark:/12148/bpt6k6277348n" target="_blank">voir</a></td></tr>
+<tr><td>1616</td><td>Les Metamorphoses d´Ovide de nouveau traduites en françois</td><td>Cuivre</td><td>Gaultier, Léonard</td><td><a href="https://www.digitale-sammlungen.de/en/view/bsb10242228?page=60," target="_blank">voir</a></td></tr>
+<tr><td>1617</td><td>Les Metamorphoses d´Ovide de nouveau traduites en françois</td><td>Cuivre</td><td>Isaac, Jaspar</td><td><a href="https://gallica.bnf.fr/ark:/12148/bpt6k722055" target="_blank">voir</a></td></tr>
+<tr><td>1619</td><td>Les Metamorphoses d´Ovide de nouveau traduites en françois</td><td>Cuivre</td><td>Mathieu, Jean et autres</td><td><a href="https://gallica.bnf.fr/ark:/12148/btv1b22000826" target="_blank">voir</a></td></tr>
+<tr><td>1621</td><td>Les Metamorphoses d´Ovide de nouveau traduites en françois</td><td>Technique inconnue</td><td>Anonyme1621</td><td><a href="https://babel.hathitrust.org/cgi/pt?id=gri.ark:/13960/t4km48114&seq=23" target="_blank">voir</a></td></tr>
+<tr><td>1621</td><td>Metamorphosis, sive transformationes Ovidianae iconibus repraesentatae</td><td>Cuivre</td><td>Moncornet, Baltazar</td><td><a href="https://gallica.bnf.fr/ark:/12148/bpt6k1520386g" target="_blank">voir</a></td></tr>
+<tr><td>1637</td><td>Pub. Ovidii Nasonis Metamorphose@n libri XV</td><td>Cuivre</td><td>Clein, Francisco (inv.) et Savery, Salomon (sculp.)</td><td><a href="https://www.digitale-sammlungen.de/de/details/bsb10863401" target="_blank">voir</a></td></tr>
+<tr><td>1637</td><td>Les Metamorphoses d´Ovide de nouveau traduites en françois</td><td>Cuivre</td><td>Mathieu, Jean et autres</td><td><a href="https://gallica.bnf.fr/ark:/12148/bpt6k87019014" target="_blank">voir</a></td></tr>
+<tr><td>1660</td><td>Les Metamorphoses d'Ovide... par Du Ryer</td><td>Cuivre</td><td>Moncornet, Baltazar</td><td><a href="https://gallica.bnf.fr/ark:/12148/bpt6k87045023" target="_blank">voir</a></td></tr>
+<tr><td>1669</td><td>Les Métamorphoses d´Ovide traduites par T. Corneille</td><td>Cuivre</td><td>Weyen, Laurent</td><td><a href="http://www.ovidiuspictus.es/en/listadoejemplares.php?de=edicion&clave=78" target="_blank">voir</a></td></tr>
+<tr><td>1676</td><td>Métamorphoses d'Ovide en rondeaux</td><td>Technique inconnue</td><td>Chauveau, François / Lepautre, Jean / Leclerc, Sébastien</td><td><a href="https://babel.hathitrust.org/cgi/pt?id=gri.ark:/13960/t6qz5wz0t&seq=7" target="_blank">voir</a></td></tr>
+<tr><td>1676</td><td>Les Metamorphoses d'Ovide... par Du Ryer</td><td>Cuivre</td><td>Weyen, Laurent</td><td><a href="https://babel.hathitrust.org/cgi/pt?id=hvd.hn64uf&seq=20" target="_blank">voir</a></td></tr>
+<tr><td>1737</td><td>Les Métamorphoses d'Ovide... par l'abbé Banier</td><td>Cuivre</td><td>Anonyme1737</td><td><a href="https://biblio.bnu.fr/opac/resource/les-metamorphoses-dovide-traduites-en-francois-avec-des-remarques-et-des-explications-historiques-pa/BUS04656488" target="_blank">voir</a></td></tr>
+    </tbody>
+  </table>
+<div class="cellule-carte"><h2>Venise</h2><div class="carte" id="carte-Venise"></div></div>
+<div class="panneau-frise"><svg class="frise" viewBox="0 0 320 130">
+    <line x1="12.0" y1="61.0" x2="304.0" y2="61.0" class="ligne-base"/>
+<path d="M 303.0 57.0 L 310.0 61.0 L 303.0 65.0 Z" class="pointe-base"/>
+<line x1="23.2" y1="18" x2="23.2" y2="104.0" class="grille-frise"/>
+<line x1="23.2" y1="57.0" x2="23.2" y2="65.0" class="tick-frise"/>
+<text x="23.2" y="120.0" text-anchor="middle" class="etiquette-annee-frise">1500</text>
+<line x1="135.5" y1="18" x2="135.5" y2="104.0" class="grille-frise"/>
+<line x1="135.5" y1="57.0" x2="135.5" y2="65.0" class="tick-frise"/>
+<text x="135.5" y="120.0" text-anchor="middle" class="etiquette-annee-frise">1600</text>
+<line x1="247.8" y1="18" x2="247.8" y2="104.0" class="grille-frise"/>
+<line x1="247.8" y1="57.0" x2="247.8" y2="65.0" class="tick-frise"/>
+<text x="247.8" y="120.0" text-anchor="middle" class="etiquette-annee-frise">1700</text>
+    <circle class="point-frise" data-i="25" cx="19.9" cy="48.5" r="5" fill="var(--c-bois)"/>
+<circle class="point-frise" data-i="26" cx="24.4" cy="73.5" r="5" fill="var(--c-bois)"/>
+<circle class="point-frise" data-i="27" cx="41.2" cy="48.5" r="5" fill="var(--c-bois)"/>
+<circle class="point-frise" data-i="28" cx="42.3" cy="73.5" r="5" fill="var(--c-inconnue)"/>
+<circle class="point-frise" data-i="29" cx="68.2" cy="61.0" r="5" fill="var(--c-bois)"/>
+<circle class="point-frise" data-i="30" cx="94.0" cy="24.5" r="5" fill="var(--c-bois)"/>
+<circle class="point-frise" data-i="31" cx="103.0" cy="48.8" r="5" fill="var(--c-bois)"/>
+<circle class="point-frise" data-i="32" cx="104.1" cy="73.2" r="5" fill="var(--c-bois)"/>
+<circle class="point-frise" data-i="33" cx="107.5" cy="97.5" r="5" fill="var(--c-bois)"/>
+<circle class="point-frise" data-i="34" cx="112.0" cy="24.5" r="5" fill="var(--c-bois)"/>
+<circle class="point-frise" data-i="35" cx="115.3" cy="39.1" r="5" fill="var(--c-bois)"/>
+<circle class="point-frise" data-i="36" cx="117.6" cy="53.7" r="5" fill="var(--c-cuivre)"/>
+<circle class="point-frise" data-i="37" cx="120.9" cy="68.3" r="5" fill="var(--c-bois)"/>
+<circle class="point-frise" data-i="38" cx="122.1" cy="82.9" r="5" fill="var(--c-bois)"/>
+<circle class="point-frise" data-i="39" cx="122.1" cy="97.5" r="5" fill="var(--c-bois)"/>
+<circle class="point-frise" data-i="40" cx="126.6" cy="48.5" r="5" fill="var(--c-bois)"/>
+<circle class="point-frise" data-i="41" cx="126.6" cy="73.5" r="5" fill="var(--c-bois)"/>
+<circle class="point-frise" data-i="42" cx="162.5" cy="61.0" r="5" fill="var(--c-bois)"/>
+  </svg></div>
+<button class="bascule action-ville" data-ville="Venise">Afficher le tableau détaillé</button>
+<table class="tableau-detaille" id="tableau-Venise">
+    <thead><tr><th>Année</th><th>Titre</th><th>Technique</th><th>Graveur</th><th>Lien</th></tr></thead>
+    <tbody>
+      <tr><td>1497</td><td>Ovidio methamorphoseos vulgare</td><td>Bois</td><td>Anonyme1497</td><td><a href="https://gallica.bnf.fr/ark:/12148/btv1b22000181/f1.item" target="_blank">voir</a></td></tr>
+<tr><td>1501</td><td>Ovidio Metamorphoseos vulgare</td><td>Bois</td><td>Anonyme1497</td><td><a href="https://gallica.bnf.fr/ark:/12148/btv1b22000507" target="_blank">voir</a></td></tr>
+<tr><td>1516</td><td>P. Ovidii Nasonis Metamorphoseos libri moralizati</td><td>Bois</td><td>Leroy II, Guillaume</td><td><a href="https://www.digitale-sammlungen.de/en/view/bsb10198255" target="_blank">voir</a></td></tr>
+<tr><td>1517</td><td>P. Ovidii Metamorphosis</td><td>Technique inconnue</td><td>inaccessible</td><td><a href="https://gallica.bnf.fr/ark:/12148/btv1b55006018r" target="_blank">voir</a></td></tr>
+<tr><td>1540</td><td>Métamorphoses Libri XV</td><td>Bois</td><td>Anonyme1540</td><td><a href="https://gallica.bnf.fr/ark:/12148/btv1b2200051n/f10.planchecontact" target="_blank">voir</a></td></tr>
+<tr><td>1563</td><td>Le metamorfosi di Ovidio</td><td>Bois</td><td>Anonyme1563</td><td><a href="https://www.digitale-sammlungen.de/en/view/bsb11217566?page=13" target="_blank">voir</a></td></tr>
+<tr><td>1571</td><td>Le Metamorfosi di Ovidio</td><td>Bois</td><td>Anonyme1563</td><td><a href="https://gallica.bnf.fr/ark:/12148/bpt6k1914143z" target="_blank">voir</a></td></tr>
+<tr><td>1572</td><td>Le Metamorfosi di Ovidio</td><td>Bois</td><td>Anonyme1572</td><td><a href="https://www.manuscriptorium.com/hub/catalog/default/detail/single/manuscriptorium%7CNKCR__-NKCR__6_K_000088__0JZOTWA-cs?lang=cs" target="_blank">voir</a></td></tr>
+<tr><td>1575</td><td>Le Metamorfosi di Ovidio</td><td>Bois</td><td>Anonyme1563</td><td><a href="https://www.digitale-sammlungen.de/en/view/bsb11217570?page=11" target="_blank">voir</a></td></tr>
+<tr><td>1579</td><td>Le Metamorfosi di Ovidio</td><td>Bois</td><td>Anonyme1579</td><td><a href="https://babel.hathitrust.org/cgi/pt?id=ucm.5324255972" target="_blank">voir</a></td></tr>
+<tr><td>1582</td><td>Le Metamorfosi di Ovidio</td><td>Bois</td><td>Anonyme1582</td><td><a href="https://www.digitale-sammlungen.de/en/view/bsb00009742?page=6" target="_blank">voir</a></td></tr>
+<tr><td>1584</td><td>Le Metamorfosi di Ovidio</td><td>Cuivre</td><td>Franco, Giacomo</td><td><a href="https://babel.hathitrust.org/cgi/pt?id=ucm.532737196x&seq=7" target="_blank">voir</a></td></tr>
+<tr><td>1587</td><td>Le Metamorfosi di Ovidio</td><td>Bois</td><td>Anonyme1572</td><td><a href="https://www.digitale-sammlungen.de/en/view/bsb10171191?page=11" target="_blank">voir</a></td></tr>
+<tr><td>1588</td><td>Le Metamorfosi di Ovidio</td><td>Bois</td><td>Anonyme1572</td><td><a href="https://www.digitale-sammlungen.de/en/view/bsb10198265?page=13" target="_blank">voir</a></td></tr>
+<tr><td>1588</td><td>Le Metamorfosi di Ovidio</td><td>Bois</td><td>Anonyme1572</td><td><a href="https://www.digitale-sammlungen.de/de/details/bsb10198265" target="_blank">voir</a></td></tr>
+<tr><td>1592</td><td>Le Metamorfosi di Ovidio</td><td>Bois</td><td>Anonyme1592</td><td><a href="https://www.digitale-sammlungen.de/en/view/bsb11214794?page=,1" target="_blank">voir</a></td></tr>
+<tr><td>1592</td><td>Le Metamorfosi di Ovidio</td><td>Bois</td><td>Anonyme1592</td><td><a href="https://www.digitale-sammlungen.de/en/view/bsb10198266" target="_blank">voir</a></td></tr>
+<tr><td>1624</td><td>Le Metamorfosi di Ovidio</td><td>Bois</td><td>Anonyme1572</td><td><a href="https://www.digitale-sammlungen.de/en/view/bsb10242264?page=7" target="_blank">voir</a></td></tr>
+    </tbody>
+  </table>
+  </div>
+  <div class="infobulle" id="infobulle"></div>
+</div>
+<script>
+  const points = [{"lat": 48.8566, "lon": 2.3522, "fx": 15.4, "fy": 36.0, "ville": "Paris", "annee": 1493, "titre": "La Bible des Poètes", "technique": "bois", "graveur": "Anonyme1493", "lien": "https://gallica.bnf.fr/ark:/12148/bpt6k5340318j"}, {"lat": 48.88393, "lon": 2.30686, "fx": 18.7, "fy": 61.0, "ville": "Paris", "annee": 1496, "titre": "Ovidius Metamorphoseos cum commento familiari", "technique": "bois", "graveur": "Anonyme1493", "lien": "https://gallica.bnf.fr/ark:/12148/bpt6k8710229r/f14.item"}, {"lat": 48.7996, "lon": 2.3598, "fx": 22.1, "fy": 86.0, "ville": "Paris", "annee": 1499, "titre": "Methamorphoze", "technique": "bois", "graveur": "Anonyme1493", "lien": "https://gallica.bnf.fr/ark:/12148/btv1b2200019f"}, {"lat": 48.91221, "lon": 2.417, "fx": 67.0, "fy": 61.0, "ville": "Paris", "annee": 1539, "titre": "Les XV. liures de la Metamorphose d'Ovide", "technique": "bois", "graveur": "Anonyme1539", "lien": "https://babel.hathitrust.org/cgi/pt?id=gri.ark:/13960/t6qz73288&seq=1"}, {"lat": 48.8425, "lon": 2.2311, "fx": 101.8, "fy": 24.5, "ville": "Paris", "annee": 1570, "titre": "Olympe des histoires poëtiques", "technique": "bois", "graveur": "Anonyme1570", "lien": "https://gallica.bnf.fr/ark:/12148/bpt6k87012662"}, {"lat": 48.80805, "lon": 2.46821, "fx": 101.8, "fy": 48.8, "ville": "Paris", "annee": 1570, "titre": "Metamorphoses Ovidii", "technique": "bois", "graveur": "Salomon, Bernard", "lien": "https://gallica.bnf.fr/ark:/12148/bpt6k8708104s"}, {"lat": 48.9523, "lon": 2.3131, "fx": 106.3, "fy": 73.2, "ville": "Paris", "annee": 1574, "titre": "Olympe des histoires poétiques", "technique": "bois", "graveur": "Salomon, Bernard", "lien": "https://gallica.bnf.fr/ark:/12148/bpt6k8710284z/f1.planchecontact"}, {"lat": 48.76161, "lon": 2.27722, "fx": 106.3, "fy": 97.5, "ville": "Paris", "annee": 1574, "titre": "Pub. Ovidii Nasonis Metamorphoseon libri XV", "technique": "bois", "graveur": "Salomon, Bernard", "lien": "https://gallica.bnf.fr/ark:/12148/bpt6k87081056"}, {"lat": 48.89586, "lon": 2.51556, "fx": 108.6, "fy": 48.5, "ville": "Paris", "annee": 1576, "titre": "Pub. Ovidii Nasonis Metamorphoseon libri XV", "technique": "bois", "graveur": "Salomon, Bernard", "lien": "https://gallica.bnf.fr/ark:/12148/bpt6k87081056"}, {"lat": 48.90291, "lon": 2.18168, "fx": 116.4, "fy": 73.5, "ville": "Paris", "annee": 1583, "titre": "Metamorphoses Ovidii… per Sprengium", "technique": "bois", "graveur": "Salomon, Bernard", "lien": "https://gallica.bnf.fr/ark:/12148/bpt6k87079136"}, {"lat": 48.74073, "lon": 2.43462, "fx": 142.3, "fy": 24.5, "ville": "Paris", "annee": 1606, "titre": "Les Metamorphoses d´Ovide de nouveau traduites en françois", "technique": "cuivre", "graveur": "Gaultier, Léonard", "lien": "http://www.ovidiuspictus.es/en/visualizacionejemplar.php?clave=47"}, {"lat": 48.98463, "lon": 2.41323, "fx": 146.8, "fy": 42.7, "ville": "Paris", "annee": 1610, "titre": "Les Metamorphoses d´Ovide de nouveau traduites en françois", "technique": "cuivre", "graveur": "Gaultier, Léonard", "lien": "https://www.digitale-sammlungen.de/en/view/bsb11913284"}, {"lat": 48.78632, "lon": 2.16791, "fx": 151.3, "fy": 61.0, "ville": "Paris", "annee": 1614, "titre": "Les Metamorphoses d´Ovide de nouveau traduites en françois", "technique": "cuivre", "graveur": "Gaultier, Léonard", "lien": "https://gallica.bnf.fr/ark:/12148/bpt6k6277348n"}, {"lat": 48.82529, "lon": 2.56874, "fx": 153.5, "fy": 79.3, "ville": "Paris", "annee": 1616, "titre": "Les Metamorphoses d´Ovide de nouveau traduites en françois", "technique": "cuivre", "graveur": "Gaultier, Léonard", "lien": "https://www.digitale-sammlungen.de/en/view/bsb10242228?page=60,"}, {"lat": 48.98043, "lon": 2.21987, "fx": 154.6, "fy": 97.5, "ville": "Paris", "annee": 1617, "titre": "Les Metamorphoses d´Ovide de nouveau traduites en françois", "technique": "cuivre", "graveur": "Isaac, Jaspar", "lien": "https://gallica.bnf.fr/ark:/12148/bpt6k722055"}, {"lat": 48.70121, "lon": 2.32161, "fx": 156.9, "fy": 36.0, "ville": "Paris", "annee": 1619, "titre": "Les Metamorphoses d´Ovide de nouveau traduites en françois", "technique": "cuivre", "graveur": "Mathieu, Jean et autres", "lien": "https://gallica.bnf.fr/ark:/12148/btv1b22000826"}, {"lat": 48.9609, "lon": 2.54026, "fx": 159.1, "fy": 61.0, "ville": "Paris", "annee": 1621, "titre": "Les Metamorphoses d´Ovide de nouveau traduites en françois", "technique": "inconnue", "graveur": "Anonyme1621", "lien": "https://babel.hathitrust.org/cgi/pt?id=gri.ark:/13960/t4km48114&seq=23"}, {"lat": 48.86348, "lon": 2.09889, "fx": 159.1, "fy": 86.0, "ville": "Paris", "annee": 1621, "titre": "Metamorphosis, sive transformationes Ovidianae iconibus repraesentatae", "technique": "cuivre", "graveur": "Moncornet, Baltazar", "lien": "https://gallica.bnf.fr/ark:/12148/bpt6k1520386g"}, {"lat": 48.73553, "lon": 2.53713, "fx": 177.1, "fy": 48.5, "ville": "Paris", "annee": 1637, "titre": "Pub. Ovidii Nasonis Metamorphose@n libri XV", "technique": "cuivre", "graveur": "Clein, Francisco (inv.) et Savery, Salomon (sculp.)", "lien": "https://www.digitale-sammlungen.de/de/details/bsb10863401"}, {"lat": 49.03276, "lon": 2.3398, "fx": 177.1, "fy": 73.5, "ville": "Paris", "annee": 1637, "titre": "Les Metamorphoses d´Ovide de nouveau traduites en françois", "technique": "cuivre", "graveur": "Mathieu, Jean et autres", "lien": "https://gallica.bnf.fr/ark:/12148/bpt6k87019014"}, {"lat": 48.71768, "lon": 2.17603, "fx": 202.9, "fy": 61.0, "ville": "Paris", "annee": 1660, "titre": "Les Metamorphoses d'Ovide... par Du Ryer", "technique": "cuivre", "graveur": "Moncornet, Baltazar", "lien": "https://gallica.bnf.fr/ark:/12148/bpt6k87045023"}, {"lat": 48.88134, "lon": 2.63146, "fx": 213.0, "fy": 61.0, "ville": "Paris", "annee": 1669, "titre": "Les Métamorphoses d´Ovide traduites par T. Corneille", "technique": "cuivre", "graveur": "Weyen, Laurent", "lien": "http://www.ovidiuspictus.es/en/listadoejemplares.php?de=edicion&clave=78"}, {"lat": 48.96496, "lon": 2.11544, "fx": 220.9, "fy": 48.5, "ville": "Paris", "annee": 1676, "titre": "Métamorphoses d'Ovide en rondeaux", "technique": "inconnue", "graveur": "Chauveau, François / Lepautre, Jean / Leclerc, Sébastien", "lien": "https://babel.hathitrust.org/cgi/pt?id=gri.ark:/13960/t6qz5wz0t&seq=7"}, {"lat": 48.66731, "lon": 2.41695, "fx": 220.9, "fy": 73.5, "ville": "Paris", "annee": 1676, "titre": "Les Metamorphoses d'Ovide... par Du Ryer", "technique": "cuivre", "graveur": "Weyen, Laurent", "lien": "https://babel.hathitrust.org/cgi/pt?id=hvd.hn64uf&seq=20"}, {"lat": 49.02858, "lon": 2.50194, "fx": 289.4, "fy": 61.0, "ville": "Paris", "annee": 1737, "titre": "Les Métamorphoses d'Ovide... par l'abbé Banier", "technique": "cuivre", "graveur": "Anonyme1737", "lien": "https://biblio.bnu.fr/opac/resource/les-metamorphoses-dovide-traduites-en-francois-avec-des-remarques-et-des-explications-historiques-pa/BUS04656488"}, {"lat": 45.4408, "lon": 12.3155, "fx": 19.9, "fy": 48.5, "ville": "Venise", "annee": 1497, "titre": "Ovidio methamorphoseos vulgare", "technique": "bois", "graveur": "Anonyme1497", "lien": "https://gallica.bnf.fr/ark:/12148/btv1b22000181/f1.item"}, {"lat": 45.47327, "lon": 12.26498, "fx": 24.4, "fy": 73.5, "ville": "Venise", "annee": 1501, "titre": "Ovidio Metamorphoseos vulgare", "technique": "bois", "graveur": "Anonyme1497", "lien": "https://gallica.bnf.fr/ark:/12148/btv1b22000507"}, {"lat": 45.37308, "lon": 12.32397, "fx": 41.2, "fy": 48.5, "ville": "Venise", "annee": 1516, "titre": "P. Ovidii Nasonis Metamorphoseos libri moralizati", "technique": "bois", "graveur": "Leroy II, Guillaume", "lien": "https://www.digitale-sammlungen.de/en/view/bsb10198255"}, {"lat": 45.50688, "lon": 12.3877, "fx": 42.3, "fy": 73.5, "ville": "Venise", "annee": 1517, "titre": "P. Ovidii Metamorphosis", "technique": "inconnue", "graveur": "inaccessible", "lien": "https://gallica.bnf.fr/ark:/12148/btv1b55006018r"}, {"lat": 45.42405, "lon": 12.18057, "fx": 68.2, "fy": 61.0, "ville": "Venise", "annee": 1540, "titre": "Métamorphoses Libri XV", "technique": "bois", "graveur": "Anonyme1540", "lien": "https://gallica.bnf.fr/ark:/12148/btv1b2200051n/f10.planchecontact"}, {"lat": 45.38311, "lon": 12.44476, "fx": 94.0, "fy": 24.5, "ville": "Venise", "annee": 1563, "titre": "Le metamorfosi di Ovidio", "technique": "bois", "graveur": "Anonyme1563", "lien": "https://www.digitale-sammlungen.de/en/view/bsb11217566?page=13"}, {"lat": 45.55451, "lon": 12.27193, "fx": 103.0, "fy": 48.8, "ville": "Venise", "annee": 1571, "titre": "Le Metamorfosi di Ovidio", "technique": "bois", "graveur": "Anonyme1563", "lien": "https://gallica.bnf.fr/ark:/12148/bpt6k1914143z"}, {"lat": 45.32793, "lon": 12.23196, "fx": 104.1, "fy": 73.2, "ville": "Venise", "annee": 1572, "titre": "Le Metamorfosi di Ovidio", "technique": "bois", "graveur": "Anonyme1572", "lien": "https://www.manuscriptorium.com/hub/catalog/default/detail/single/manuscriptorium%7CNKCR__-NKCR__6_K_000088__0JZOTWA-cs?lang=cs"}, {"lat": 45.48744, "lon": 12.49752, "fx": 107.5, "fy": 97.5, "ville": "Venise", "annee": 1575, "titre": "Le Metamorfosi di Ovidio", "technique": "bois", "graveur": "Anonyme1563", "lien": "https://www.digitale-sammlungen.de/en/view/bsb11217570?page=11"}, {"lat": 45.49582, "lon": 12.12551, "fx": 112.0, "fy": 24.5, "ville": "Venise", "annee": 1579, "titre": "Le Metamorfosi di Ovidio", "technique": "bois", "graveur": "Anonyme1579", "lien": "https://babel.hathitrust.org/cgi/pt?id=ucm.5324255972"}, {"lat": 45.30312, "lon": 12.40733, "fx": 115.3, "fy": 39.1, "ville": "Venise", "annee": 1582, "titre": "Le Metamorfosi di Ovidio", "technique": "bois", "graveur": "Anonyme1582", "lien": "https://www.digitale-sammlungen.de/en/view/bsb00009742?page=6"}, {"lat": 45.59293, "lon": 12.38349, "fx": 117.6, "fy": 53.7, "ville": "Venise", "annee": 1584, "titre": "Le Metamorfosi di Ovidio", "technique": "cuivre", "graveur": "Franco, Giacomo", "lien": "https://babel.hathitrust.org/cgi/pt?id=ucm.532737196x&seq=7"}, {"lat": 45.3573, "lon": 12.11017, "fx": 120.9, "fy": 68.3, "ville": "Venise", "annee": 1587, "titre": "Le Metamorfosi di Ovidio", "technique": "bois", "graveur": "Anonyme1572", "lien": "https://www.digitale-sammlungen.de/en/view/bsb10171191?page=11"}, {"lat": 45.40359, "lon": 12.55676, "fx": 122.1, "fy": 82.9, "ville": "Venise", "annee": 1588, "titre": "Le Metamorfosi di Ovidio", "technique": "bois", "graveur": "Anonyme1572", "lien": "https://www.digitale-sammlungen.de/en/view/bsb10198265?page=13"}, {"lat": 45.58793, "lon": 12.16806, "fx": 122.1, "fy": 97.5, "ville": "Venise", "annee": 1588, "titre": "Le Metamorfosi di Ovidio", "technique": "bois", "graveur": "Anonyme1572", "lien": "https://www.digitale-sammlungen.de/de/details/bsb10198265"}, {"lat": 45.25617, "lon": 12.28142, "fx": 126.6, "fy": 48.5, "ville": "Venise", "annee": 1592, "titre": "Le Metamorfosi di Ovidio", "technique": "bois", "graveur": "Anonyme1592", "lien": "https://www.digitale-sammlungen.de/en/view/bsb11214794?page=,1"}, {"lat": 45.56472, "lon": 12.52503, "fx": 126.6, "fy": 73.5, "ville": "Venise", "annee": 1592, "titre": "Le Metamorfosi di Ovidio", "technique": "bois", "graveur": "Anonyme1592", "lien": "https://www.digitale-sammlungen.de/en/view/bsb10198266"}, {"lat": 45.44898, "lon": 12.03326, "fx": 162.5, "fy": 61.0, "ville": "Venise", "annee": 1624, "titre": "Le Metamorfosi di Ovidio", "technique": "bois", "graveur": "Anonyme1572", "lien": "https://www.digitale-sammlungen.de/en/view/bsb10242264?page=7"}, {"lat": 45.764, "lon": 4.8357, "fx": 34.5, "fy": 24.5, "ville": "Lyon", "annee": 1510, "titre": "P. Ovidii Nasonis Metamorphoseos libri moralizati", "technique": "bois", "graveur": "Leroy II, Guillaume", "lien": "https://gallica.bnf.fr/ark:/12148/bpt6k87102394"}, {"lat": 45.79394, "lon": 4.78886, "fx": 35.6, "fy": 48.8, "ville": "Lyon", "annee": 1511, "titre": "P. Ovidii Nasonis Metamorphoseos libri moralizati", "technique": "bois", "graveur": "Anonyme1511", "lien": "https://www.digitale-sammlungen.de/en/view/bsb11913472?page=,1"}, {"lat": 45.70156, "lon": 4.84356, "fx": 41.2, "fy": 73.2, "ville": "Lyon", "annee": 1516, "titre": "P. Ovidii Nasonis Metamorphoseos libri moralizati", "technique": "bois", "graveur": "Leroy II, Guillaume", "lien": "http://www.ovidiuspictus.es/en/visualizacionejemplar.php?clave=146;?%3E"}, {"lat": 45.82492, "lon": 4.90265, "fx": 43.4, "fy": 97.5, "ville": "Lyon", "annee": 1518, "titre": "P. Ovidii Nasonis Metamorphoseos libri moralizati", "technique": "bois", "graveur": "Leroy II, Guillaume", "lien": "https://www.digitale-sammlungen.de/en/view/bsb10198256?page=,1"}, {"lat": 45.74856, "lon": 4.71059, "fx": 44.6, "fy": 24.5, "ville": "Lyon", "annee": 1519, "titre": "P. Ovidii Nasonis Metamorphoseos libri moralizati", "technique": "bois", "graveur": "Leroy II, Guillaume", "lien": "https://gallica.bnf.fr/ark:/12148/bpt6k87093449"}, {"lat": 45.71081, "lon": 4.95556, "fx": 53.6, "fy": 42.7, "ville": "Lyon", "annee": 1527, "titre": "Publii Ovidii Nasonis Sulmonensis Metamorphoseos Librorum xv", "technique": "bois", "graveur": "Anonyme1527", "lien": "https://babel.hathitrust.org/cgi/pt?id=ucm.5327231213&seq=1"}, {"lat": 45.86884, "lon": 4.7953, "fx": 53.6, "fy": 61.0, "ville": "Lyon", "annee": 1527, "titre": "Publii Ouidii Nasonis Sulmonensis Metamorphoseos Librorum XV", "technique": "bois", "graveur": "Leroy II, Guillaume", "lien": "http://www.ovidiuspictus.es/en/visualizacionejemplar.php?clave=106"}, {"lat": 45.65994, "lon": 4.75823, "fx": 54.7, "fy": 79.3, "ville": "Lyon", "annee": 1528, "titre": "Textus Ovidii Metamorpho. Lib. XV", "technique": "bois", "graveur": "Anonyme1527", "lien": "http://www.ovidiuspictus.es/en/visualizacionejemplar.php?clave=150"}, {"lat": 45.807, "lon": 5.00448, "fx": 59.2, "fy": 97.5, "ville": "Lyon", "annee": 1532, "titre": "Le Grand Olympe", "technique": "bois", "graveur": "Anonyme1532", "lien": "https://gallica.bnf.fr/ark:/12148/btv1b8600297j"}, {"lat": 45.81473, "lon": 4.65953, "fx": 70.4, "fy": 61.0, "ville": "Lyon", "annee": 1542, "titre": "P. Ovidii Nasonis Metamorphoseon, hoc est Transformationum, libri XV", "technique": "bois", "graveur": "Anonyme1532", "lien": "http://www.ovidiuspictus.es/en/visualizacionejemplar.php?clave=149"}, {"lat": 45.63707, "lon": 4.92086, "fx": 86.1, "fy": 24.5, "ville": "Lyon", "annee": 1556, "titre": "Trois Premiers livres de la Métamorphose d'Ovide", "technique": "bois", "graveur": "Eskrich, Pierre", "lien": "https://gallica.bnf.fr/ark:/12148/btv1b22000559"}, {"lat": 45.90425, "lon": 4.89875, "fx": 86.1, "fy": 42.7, "ville": "Lyon", "annee": 1556, "titre": "Trois Premiers livres de la Métamorphose d'Ovide", "technique": "bois", "graveur": "Eskrich, Pierre", "lien": "https://gallica.bnf.fr/ark:/12148/bpt6k8709995p"}, {"lat": 45.68702, "lon": 4.6453, "fx": 87.2, "fy": 61.0, "ville": "Lyon", "annee": 1557, "titre": "La Metamorphose figurée", "technique": "bois", "graveur": "Salomon, Bernard", "lien": "https://gallica.bnf.fr/ark:/12148/btv1b2200047r"}, {"lat": 45.7297, "lon": 5.05942, "fx": 87.2, "fy": 79.3, "ville": "Lyon", "annee": 1557, "titre": "Excellente figueren", "technique": "bois", "graveur": "Salomon, Bernard", "lien": "https://books.google.fr/books?id=izdoAAAAcAAJ&printsec=frontcover&hl=fr&source=gbs_ge_summary_r&cad=0#v=onepage&q&f=false"}, {"lat": 45.89965, "lon": 4.69898, "fx": 89.5, "fy": 97.5, "ville": "Lyon", "annee": 1559, "titre": "La vita et metamorfoseo d'Ovidio", "technique": "bois", "graveur": "Salomon, Bernard", "lien": "https://gallica.bnf.fr/ark:/12148/btv1b22000485"}, {"lat": 45.59378, "lon": 4.8041, "fx": 95.1, "fy": 61.0, "ville": "Lyon", "annee": 1564, "titre": "La Metamorphose figurée", "technique": "bois", "graveur": "Salomon, Bernard", "lien": "https://gallica.bnf.fr/ark:/12148/bpt6k8701267g"}, {"lat": 45.87825, "lon": 5.03, "fx": 117.6, "fy": 61.0, "ville": "Lyon", "annee": 1584, "titre": "La vita et metamorfoseo d'Ovidio", "technique": "bois", "graveur": "Salomon, Bernard", "lien": "https://gallica.bnf.fr/ark:/12148/bpt6k8708126c"}, {"lat": 45.77154, "lon": 4.57399, "fx": 167.0, "fy": 61.0, "ville": "Lyon", "annee": 1628, "titre": "Les Metamorphoses d´Ovide de nouveau traduites en françois", "technique": "cuivre", "graveur": "Briot, Isaac", "lien": "https://gallica.bnf.fr/ark:/12148/bpt6k6262846q"}, {"lat": 45.63138, "lon": 5.02676, "fx": 244.5, "fy": 36.0, "ville": "Lyon", "annee": 1697, "titre": "Les Oeuvres d’Ovide par Monsieur de Martignac", "technique": "cuivre", "graveur": "monogrammiste H.T.", "lien": "http://www.ovidiuspictus.es/en/listadoejemplares.php?de=edicion&clave=30"}, {"lat": 45.95697, "lon": 4.82289, "fx": 244.5, "fy": 61.0, "ville": "Lyon", "annee": 1697, "titre": "Les Oeuvres d’Ovide par Monsieur de Martignac", "technique": "cuivre", "graveur": "monogrammiste H.T.", "lien": "http://www.ovidiuspictus.es/en/listadoejemplares.php?de=edicion&clave=31"}, {"lat": 45.61182, "lon": 4.65369, "fx": 244.5, "fy": 86.0, "ville": "Lyon", "annee": 1697, "titre": "Les Oeuvres d’Ovide par Monsieur de Martignac", "technique": "cuivre", "graveur": "monogrammiste H.T.", "lien": "https://babel.hathitrust.org/cgi/pt?id=ucm.5323841268&seq=7"}];
+  const villesCoords = {"Lyon": [45.764, 4.8357], "Paris": [48.8566, 2.3522], "Venise": [45.4408, 12.3155]};
+  const libellesTechnique = {"bois": "Bois", "cuivre": "Cuivre", "inconnue": "Technique inconnue"};
+  const couleursClair = {"bois": "#2a78d6", "cuivre": "#1baf7a", "inconnue": "#9a9993"};
+
+  // Légende (une puce par catégorie de technique réellement présente dans les données)
+  const techniquesPresentes = [...new Set(points.map(p => p.technique))]
+    .sort((a, b) => (a === "inconnue") - (b === "inconnue"));  // "inconnue" en dernier
+  document.getElementById('legende').innerHTML = techniquesPresentes.map(t =>
+    '<div class="item"><span class="puce" style="background:' + couleursClair[t] + '"></span>' +
+    libellesTechnique[t] + '</div>'
+  ).join('');
+
+  function contenuInfobulle(p) {
+    const lien = p.lien ? '<br><a href="' + p.lien + '" target="_blank">→ voir</a>' : '';
+    return '<b>' + p.titre + '</b><br>' +
+      '<span>' + p.ville + ', ' + p.annee + ' · ' + libellesTechnique[p.technique] + '</span>' +
+      (p.graveur ? '<br>' + p.graveur : '') + lien;
+  }
+
+  // Une carte Leaflet par ville, chacune cadrée sur son propre nuage (pas sur les 3 villes
+  // à la fois : Lyon/Paris/Venise sont loin les unes des autres, une seule carte les
+  // englobant montrerait surtout du vide entre elles).
+  for (const ville of Object.keys(villesCoords)) {
+    const pointsVille = points.filter(p => p.ville === ville);
+    const map = L.map('carte-' + ville, {scrollWheelZoom:false});
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+      {attribution:'© OpenStreetMap contributors', maxZoom:18}).addTo(map);
+
+    const bornes = L.latLngBounds(pointsVille.map(p => [p.lat, p.lon]));
+    map.fitBounds(bornes, {padding:[36, 36]});
+
+    pointsVille.forEach(p => {
+      L.circleMarker([p.lat, p.lon], {
+        radius:7, color:'#3e2c23', weight:1, fillColor: couleursClair[p.technique], fillOpacity:.85
+      }).addTo(map).bindTooltip(contenuInfobulle(p), {sticky:true, maxWidth:260});
+    });
+  }
+
+  // Infobulle partagée pour les points de la frise chronologique (SVG, à droite de chaque carte)
+  const infobulle = document.getElementById('infobulle');
+  const page = document.querySelector('.page');
+  document.querySelectorAll('.point-frise').forEach(cercle => {
+    const p = points[+cercle.dataset.i];
+    cercle.addEventListener('mouseenter', () => {
+      cercle.classList.add('actif');
+      infobulle.innerHTML = contenuInfobulle(p);
+      infobulle.style.opacity = 1;
+    });
+    cercle.addEventListener('mousemove', (ev) => {
+      const r = page.getBoundingClientRect();
+      infobulle.style.left = (ev.clientX - r.left + 14) + 'px';
+      infobulle.style.top = (ev.clientY - r.top + 14) + 'px';
+    });
+    cercle.addEventListener('mouseleave', () => {
+      cercle.classList.remove('actif');
+      infobulle.style.opacity = 0;
+    });
+  });
+
+  // Un bouton "Afficher le tableau détaillé" par ville, juste sous sa carte/frise.
+  document.querySelectorAll('.action-ville').forEach(bouton => {
+    bouton.addEventListener('click', () => {
+      const tableau = document.getElementById('tableau-' + bouton.dataset.ville);
+      const visible = tableau.classList.toggle('visible');
+      bouton.textContent = visible ? 'Masquer le tableau détaillé' : 'Afficher le tableau détaillé';
+    });
+  });
+</script>
+</body></html>
