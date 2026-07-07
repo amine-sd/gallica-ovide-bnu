@@ -1,0 +1,48 @@
+{
+  "seed": 42,
+  "ratios_cibles": [
+    0.7,
+    0.15,
+    0.15
+  ],
+  "repartition": {
+    "bois": {
+      "train": [
+        "bois_solis_feyerabend_francfort1581",
+        "bois_salomon_rouille_lyon1557"
+      ],
+      "val": [
+        "bois_wickram_behem_mayence1545"
+      ],
+      "test": [
+        "bois_eskrich_rouille_lyon1556",
+        "bois_leroy_gueynard_lyon1510"
+      ]
+    },
+    "cuivre": {
+      "train": [
+        "cuivre_borcht_plantin_anvers1591",
+        "cuivre_monconet_sommaville_paris1660",
+        "cuivre_tempesta_dejode_anvers1606",
+        "cuivre_mathieu_langelier_paris1619",
+        "cuivre_depasse_depasse_koln1602",
+        "cuivre_goltzius_goltzius_haarlem1589",
+        "cuivre_ht_molin_lyon1697",
+        "cuivre_gaultier_guillemot_paris1610",
+        "cuivre_franco_giunta_venise1584"
+      ],
+      "val": [
+        "cuivre_bouche_blaeu_amsterdam1702",
+        "cuivre_savery_farnaby_paris1637",
+        "cuivre_blanchin_berthelin_rouen1651",
+        "cuivre_philippe_hackiana_leyde1670"
+      ],
+      "test": [
+        "cuivre_baur_sn_vienne1639",
+        "cuivre_briot_drobet_lyon1628",
+        "cuivre_isaac_langelier_paris1617",
+        "cuivre_weyen_barbin_paris1669"
+      ]
+    }
+  }
+}

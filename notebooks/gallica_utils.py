@@ -35,7 +35,7 @@ from huggingface_hub import hf_hub_download
 # CONFIGURATION GLOBALE
 # ─────────────────────────────────────────────
 
-BASE_URL    = "https://gallica-search-api-preprod.bnf.lajavaness.com"
+BASE_URL    = "https://galimages-search.bnf.fr"
 ARK_SALOMON = "btv1b2200047r"
 CLASSES     = ["bois", "cuivre"]
 
