@@ -36,9 +36,3 @@ récupération). Pas de fiche détaillée pour ces fichiers pour l'instant :
 - `atelier_regroupement.py` — script de regroupement d'illustrations.
 - `galerie_bibles.py` / `galerie_tri_bibles.ipynb` — génération/tri de galeries
   d'illustrations pour inspection visuelle.
-
-## Cartes et visualisations
-
-- `carte_circulation.ipynb` — carte de circulation des éditions.
-- `nuage_editions_villes.ipynb` — visualisation des éditions par ville (Paris, Lyon,
-  Venise).

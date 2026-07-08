@@ -32,6 +32,7 @@ notebooks/
 ├── documentation_similarite_salomon/    ← recherche par similarité d'image (corpus Salomon)
 ├── classification_bois_cuivre/          ← classifieur ResNet50 bois / cuivre — axe clôturé
 ├── classification_graveur/              ← classification par graveur — en cours
+├── visualisations/                      ← notebooks de visualisations spécifiques (cartes, frises...)
 ├── 04_exploration/                      ← explorations ponctuelles
 └── 05_annexes/                          ← tâches annexes
 ```
@@ -45,10 +46,14 @@ notebooks/
   l'historique des versions (v1 à v4.1.1).
 - **[`classification_graveur/`](classification_graveur/README.md)** —
   classification par graveur, axe en cours (constitution du dataset).
+- **[`visualisations/`](visualisations/README.md)** — notebooks produisant chacun une
+  visualisation HTML autonome. Pour l'instant : cartes et frises chronologiques de la
+  circulation des éditions (villes, graveurs, copies), à partir du corpus de référence
+  de Céline Bohnert (`retours_celine/BNU_corpus.ods`).
 - **[`04_exploration/`](04_exploration/README.md)** — explorations ponctuelles :
   comparaison CLIP/DINOv2, tests LLM sur l'iconographie, clustering de bibles
-  illustrées, cartes de circulation, et la validation BnF exploratoire de l'axe
-  bois/cuivre (déplacée ici, voir raisons dans son README).
+  illustrées, et la validation BnF exploratoire de l'axe bois/cuivre (déplacée ici,
+  voir raisons dans son README).
 - **[`05_annexes/`](05_annexes/README.md)** — tâches annexes (récupération de bibles
   illustrées BSB/MDZ).
 
