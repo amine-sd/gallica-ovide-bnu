@@ -31,7 +31,7 @@ notebooks/
 │
 ├── documentation_similarite_salomon/    ← recherche par similarité d'image (corpus Salomon)
 ├── classification_bois_cuivre/          ← classifieur ResNet50 bois / cuivre — axe clôturé
-├── 03_classification_graveur/           ← classification par graveur — en cours
+├── classification_graveur/              ← classification par graveur — en cours
 ├── 04_exploration/                      ← explorations ponctuelles
 └── 05_annexes/                          ← tâches annexes
 ```
@@ -43,7 +43,7 @@ notebooks/
   classifieur ResNet50 bois/cuivre. Axe **clôturé** : v4.0.0 et v4.1.1 retenues comme
   versions finales, voir le README du dossier pour la fiche technique complète et
   l'historique des versions (v1 à v4.1.1).
-- **[`03_classification_graveur/`](03_classification_graveur/README.md)** —
+- **[`classification_graveur/`](classification_graveur/README.md)** —
   classification par graveur, axe en cours (constitution du dataset).
 - **[`04_exploration/`](04_exploration/README.md)** — explorations ponctuelles :
   comparaison CLIP/DINOv2, tests LLM sur l'iconographie, clustering de bibles
@@ -51,6 +51,18 @@ notebooks/
   bois/cuivre (déplacée ici, voir raisons dans son README).
 - **[`05_annexes/`](05_annexes/README.md)** — tâches annexes (récupération de bibles
   illustrées BSB/MDZ).
+
+---
+
+## Base d'illustrations segmentées — partagée entre axes
+
+`classification_bois_cuivre/01_dataset.ipynb` et
+`classification_graveur/01_constitution_dataset.ipynb` alimentent tous les deux le
+même réservoir d'illustrations segmentées, `data/editions_ovide/segmentees/`,
+chacun avec ses propres éditions et son propre notebook de récupération. Une
+édition retrouvée et segmentée par l'un des deux axes devient donc immédiatement
+disponible pour l'autre — les deux notebooks se construisent mutuellement cette
+base commune plutôt que de la dupliquer chacun de leur côté.
 
 ---
 

@@ -29,7 +29,7 @@ working_dir/
 ├── notebooks/        ← tout le code (voir notebooks/README.md pour le détail du pipeline)
 ├── data/              ← données (brutes, segmentées, datasets) — volumineux, exclu de Git
 │   ├── bibles_mdz/     ← corpus de bibles MDZ/BSB
-│   └── bois_cuivre/    ← sources, illustrations segmentées et dataset d'entraînement bois/cuivre
+│   └── editions_ovide/ ← sources, illustrations segmentées et datasets (bois/cuivre, graveur)
 ├── modeles/            ← poids des modèles entraînés (.pth) — exclus de Git
 ├── resultats/          ← CSV, tableaux HTML de validation, visualisations, métriques
 ├── retours_celine/     ← annotations de validation expertes (Céline)
