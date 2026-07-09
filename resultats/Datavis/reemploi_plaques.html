@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="fr"><head><meta charset="utf-8">
+<title>Réemploi des plaques gravées entre éditeurs</title>
+<style>
+  :root {
+    --surface: #fffaf0; --texte-fort: #2b1e15; --texte-att: #6b5c4f; --trait: #d8cfc0;
+    --contour-point: #3e2c23; --c-lien: #2a78d6; --c-transfert: #c0392b; --bande: #f2e9d8;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --surface: #1a1a19; --texte-fort: #f2ece2; --texte-att: #c3baa9; --trait: #3a352c;
+      --contour-point: #f2ece2; --c-lien: #3987e5; --c-transfert: #e0685a; --bande: #232019;
+    }
+  }
+  body { margin:0; font-family:Georgia,serif; background:var(--surface); color:var(--texte-fort); }
+  .page { max-width:1080px; margin:0 auto; padding:16px 20px 32px; position:relative; }
+  h1 { font-size:19px; margin:0 0 4px; }
+  p.souschapo { font-size:13px; color:var(--texte-att); margin:0 0 12px; }
+
+  .legende { display:flex; gap:18px; flex-wrap:wrap; font-size:12px; margin:0 0 14px; }
+  .legende .item { display:flex; align-items:center; gap:6px; }
+  .legende .trait { display:inline-block; width:26px; height:0; border-top-width:2px; }
+  .legende .reprise { border-top:2px solid var(--texte-att); }
+  .legende .transfert { border-top:2px solid var(--c-transfert); }
+  .legende .incertain { border-top:2px dashed var(--texte-att); }
+
+  .cadre-frise { overflow-x:auto; border:1px solid var(--trait); border-radius:6px;
+    box-shadow:0 1px 6px rgba(0,0,0,.15); }
+  .frise { display:block; min-width:100%; }
+  .bande-zebra { fill:var(--bande); }
+  .etiquette-plaque { font-size:11px; fill:var(--texte-fort); }
+  .grille-frise { stroke:var(--trait); stroke-width:1; }
+  .etiquette-annee-frise { font-size:10px; fill:var(--texte-att); }
+  .segment-reprise { stroke:var(--texte-att); stroke-width:1.5; }
+  .segment-transfert { stroke:var(--c-transfert); stroke-width:2; }
+  .segment-incertain { stroke:var(--texte-att); stroke-width:1.5; stroke-dasharray:3,3; }
+  .point-frise { fill:var(--surface); stroke:var(--contour-point); stroke-width:1.3; cursor:pointer;
+    transition:r .15s; }
+  .point-frise:hover, .point-frise.actif { r:7; fill:var(--c-lien); }
+
+  .action-tableau { margin:14px 0 0; }
+  button.bascule { font-family:Georgia,serif; font-size:12px; background:none;
+    border:1px solid var(--trait); color:var(--texte-fort); border-radius:4px; padding:5px 10px;
+    cursor:pointer; }
+  table.tableau-detaille { width:100%; border-collapse:collapse; font-size:12px; margin:8px 0;
+    display:none; }
+  table.tableau-detaille.visible { display:table; }
+  table.tableau-detaille th, table.tableau-detaille td { text-align:left; padding:4px 8px;
+    border-bottom:1px solid var(--trait); }
+  table.tableau-detaille a { color:var(--c-lien); }
+
+  .infobulle { position:absolute; pointer-events:none; background:var(--surface);
+    border:1px solid var(--contour-point); border-radius:5px; padding:6px 10px; font-size:12px;
+    max-width:260px; opacity:0; transition:opacity .1s; box-shadow:0 2px 8px rgba(0,0,0,.3); z-index:2000; }
+  .infobulle.epinglee { pointer-events:auto; }
+  .infobulle a { color:var(--c-lien); }
+  .infobulle .fermer-infobulle { position:absolute; top:2px; right:6px; cursor:pointer;
+    color:var(--texte-att); font-size:13px; }
+</style></head><body>
+<div class="page">
+  <h1>Réemploi des plaques gravées entre éditeurs</h1>
+  <p class="souschapo">Une ligne = un jeu de plaques réemployé (≥2 éditions), un point = une
+    édition qui l'utilise, positionnée par année. Cliquer un point affiche le détail avec le
+    lien "voir" (le survol seul n'affiche qu'un aperçu).</p>
+  <div class="legende">
+    <div class="item"><span class="trait reprise"></span>réimpression (même éditeur)</div>
+    <div class="item"><span class="trait transfert"></span>transmission à un autre éditeur</div>
+    <div class="item"><span class="trait incertain"></span>incertain (éditeur non identifié)</div>
+  </div>
+  <div class="cadre-frise">
+    <svg class="frise" viewBox="0 0 1000 690" width="1000" height="690">
+      <defs>
+        <marker id="fleche-transfert" viewBox="0 0 10 10" refX="8" refY="5"
+          markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M0,0 L10,5 L0,10 z" fill="var(--c-transfert)"/>
+        </marker>
+      </defs>
+      <text x="8" y="46.0" class="etiquette-plaque">Solis, Virgil</text>
+<rect x="0" y="54" width="1000" height="24" class="bande-zebra"/>
+<text x="8" y="70.0" class="etiquette-plaque">Salomon, Bernard</text>
+<text x="8" y="94.0" class="etiquette-plaque">Leroy II, Guillaume</text>
+<rect x="0" y="102" width="1000" height="24" class="bande-zebra"/>
+<text x="8" y="118.0" class="etiquette-plaque">Anonyme1572</text>
+<text x="8" y="142.0" class="etiquette-plaque">Baur, Johann Wilhelm,</text>
+<rect x="0" y="150" width="1000" height="24" class="bande-zebra"/>
+<text x="8" y="166.0" class="etiquette-plaque">Gaultier, Léonard</text>
+<text x="8" y="190.0" class="etiquette-plaque">Anonyme1493</text>
+<rect x="0" y="198" width="1000" height="24" class="bande-zebra"/>
+<text x="8" y="214.0" class="etiquette-plaque">Anonyme1563</text>
+<text x="8" y="238.0" class="etiquette-plaque">Anonyme1693</text>
+<rect x="0" y="246" width="1000" height="24" class="bande-zebra"/>
+<text x="8" y="262.0" class="etiquette-plaque">monogrammiste H.T.</text>
+<text x="8" y="286.0" class="etiquette-plaque">Anonyme1497</text>
+<rect x="0" y="294" width="1000" height="24" class="bande-zebra"/>
+<text x="8" y="310.0" class="etiquette-plaque">Anonyme1527</text>
+<text x="8" y="334.0" class="etiquette-plaque">Anonyme1532</text>
+<rect x="0" y="342" width="1000" height="24" class="bande-zebra"/>
+<text x="8" y="358.0" class="etiquette-plaque">Wickram, Jörg (1505?-1560?)</text>
+<text x="8" y="382.0" class="etiquette-plaque">Eskrich, Pierre</text>
+<rect x="0" y="390" width="1000" height="24" class="bande-zebra"/>
+<text x="8" y="406.0" class="etiquette-plaque">Anonyme1579</text>
+<text x="8" y="430.0" class="etiquette-plaque">Anonyme1592</text>
+<rect x="0" y="438" width="1000" height="24" class="bande-zebra"/>
+<text x="8" y="454.0" class="etiquette-plaque">Passe, Crispin de</text>
+<text x="8" y="478.0" class="etiquette-plaque">Tempesta, Antonio</text>
+<rect x="0" y="486" width="1000" height="24" class="bande-zebra"/>
+<text x="8" y="502.0" class="etiquette-plaque">Anonyme1608</text>
+<text x="8" y="526.0" class="etiquette-plaque">Mathieu, Jean et autres</text>
+<rect x="0" y="534" width="1000" height="24" class="bande-zebra"/>
+<text x="8" y="550.0" class="etiquette-plaque">Moncornet, Baltazar</text>
+<text x="8" y="574.0" class="etiquette-plaque">Blanchin, Jean</text>
+<rect x="0" y="582" width="1000" height="24" class="bande-zebra"/>
+<text x="8" y="598.0" class="etiquette-plaque">Philippe, Pierre</text>
+<text x="8" y="622.0" class="etiquette-plaque">Weyen, Laurent</text>
+<rect x="0" y="630" width="1000" height="24" class="bande-zebra"/>
+<text x="8" y="646.0" class="etiquette-plaque">Mulder, Joseph</text>
+<line x1="239.6" y1="30" x2="239.6" y2="654.0" class="grille-frise"/>
+<text x="239.6" y="672.0" text-anchor="middle" class="etiquette-annee-frise">1500</text>
+<line x1="535.8" y1="30" x2="535.8" y2="654.0" class="grille-frise"/>
+<text x="535.8" y="672.0" text-anchor="middle" class="etiquette-annee-frise">1600</text>
+<line x1="831.9" y1="30" x2="831.9" y2="654.0" class="grille-frise"/>
+<text x="831.9" y="672.0" text-anchor="middle" class="etiquette-annee-frise">1700</text>
+<line x1="426.2" y1="42.0" x2="429.2" y2="42.0" class="segment-transfert" marker-end="url(#fleche-transfert)"/>
+<line x1="429.2" y1="42.0" x2="444.0" y2="42.0" class="segment-transfert" marker-end="url(#fleche-transfert)"/>
+<line x1="444.0" y1="42.0" x2="449.9" y2="42.0" class="segment-transfert" marker-end="url(#fleche-transfert)"/>
+<line x1="449.9" y1="42.0" x2="449.9" y2="42.0" class="segment-transfert" marker-end="url(#fleche-transfert)"/>
+<line x1="449.9" y1="42.0" x2="479.5" y2="42.0" class="segment-transfert" marker-end="url(#fleche-transfert)"/>
+<line x1="479.5" y1="42.0" x2="521.0" y2="42.0" class="segment-transfert" marker-end="url(#fleche-transfert)"/>
+<line x1="521.0" y1="42.0" x2="562.4" y2="42.0" class="segment-transfert" marker-end="url(#fleche-transfert)"/>
+<line x1="562.4" y1="42.0" x2="592.0" y2="42.0" class="segment-transfert" marker-end="url(#fleche-transfert)"/>
+<line x1="592.0" y1="42.0" x2="627.6" y2="42.0" class="segment-transfert" marker-end="url(#fleche-transfert)"/>
+<line x1="627.6" y1="42.0" x2="683.8" y2="42.0" class="segment-transfert" marker-end="url(#fleche-transfert)"/>
+<line x1="408.4" y1="66.0" x2="408.4" y2="66.0" class="segment-reprise"/>
+<line x1="408.4" y1="66.0" x2="414.3" y2="66.0" class="segment-reprise"/>
+<line x1="414.3" y1="66.0" x2="429.2" y2="66.0" class="segment-reprise"/>
+<line x1="429.2" y1="66.0" x2="446.9" y2="66.0" class="segment-transfert" marker-end="url(#fleche-transfert)"/>
+<line x1="446.9" y1="66.0" x2="458.8" y2="66.0" class="segment-reprise"/>
+<line x1="458.8" y1="66.0" x2="458.8" y2="66.0" class="segment-reprise"/>
+<line x1="458.8" y1="66.0" x2="464.7" y2="66.0" class="segment-reprise"/>
+<line x1="464.7" y1="66.0" x2="485.4" y2="66.0" class="segment-reprise"/>
+<line x1="485.4" y1="66.0" x2="488.4" y2="66.0" class="segment-transfert" marker-end="url(#fleche-transfert)"/>
+<line x1="269.2" y1="90.0" x2="287.0" y2="90.0" class="segment-transfert" marker-end="url(#fleche-transfert)"/>
+<line x1="287.0" y1="90.0" x2="287.0" y2="90.0" class="segment-transfert" marker-end="url(#fleche-transfert)"/>
+<line x1="287.0" y1="90.0" x2="292.9" y2="90.0" class="segment-reprise"/>
+<line x1="292.9" y1="90.0" x2="295.9" y2="90.0" class="segment-transfert" marker-end="url(#fleche-transfert)"/>
+<line x1="295.9" y1="90.0" x2="319.6" y2="90.0" class="segment-transfert" marker-end="url(#fleche-transfert)"/>
+<line x1="452.8" y1="114.0" x2="497.3" y2="114.0" class="segment-transfert" marker-end="url(#fleche-transfert)"/>
+<line x1="497.3" y1="114.0" x2="500.2" y2="114.0" class="segment-transfert" marker-end="url(#fleche-transfert)"/>
+<line x1="500.2" y1="114.0" x2="500.2" y2="114.0" class="segment-incertain"/>
+<line x1="500.2" y1="114.0" x2="606.8" y2="114.0" class="segment-incertain"/>
+<line x1="651.3" y1="138.0" x2="831.9" y2="138.0" class="segment-incertain"/>
+<line x1="831.9" y1="138.0" x2="858.6" y2="138.0" class="segment-incertain"/>
+<line x1="858.6" y1="138.0" x2="885.2" y2="138.0" class="segment-incertain"/>
+<line x1="885.2" y1="138.0" x2="911.9" y2="138.0" class="segment-incertain"/>
+<line x1="553.5" y1="162.0" x2="565.4" y2="162.0" class="segment-reprise"/>
+<line x1="565.4" y1="162.0" x2="577.2" y2="162.0" class="segment-transfert" marker-end="url(#fleche-transfert)"/>
+<line x1="577.2" y1="162.0" x2="583.2" y2="162.0" class="segment-incertain"/>
+<line x1="218.9" y1="186.0" x2="227.8" y2="186.0" class="segment-transfert" marker-end="url(#fleche-transfert)"/>
+<line x1="227.8" y1="186.0" x2="236.7" y2="186.0" class="segment-transfert" marker-end="url(#fleche-transfert)"/>
+<line x1="426.2" y1="210.0" x2="449.9" y2="210.0" class="segment-reprise"/>
+<line x1="449.9" y1="210.0" x2="461.7" y2="210.0" class="segment-reprise"/>
+<line x1="811.2" y1="234.0" x2="811.2" y2="234.0" class="segment-reprise"/>
+<line x1="811.2" y1="234.0" x2="811.2" y2="234.0" class="segment-reprise"/>
+<line x1="823.0" y1="258.0" x2="823.0" y2="258.0" class="segment-reprise"/>
+<line x1="823.0" y1="258.0" x2="823.0" y2="258.0" class="segment-reprise"/>
+<line x1="230.7" y1="282.0" x2="242.6" y2="282.0" class="segment-transfert" marker-end="url(#fleche-transfert)"/>
+<line x1="319.6" y1="306.0" x2="322.5" y2="306.0" class="segment-transfert" marker-end="url(#fleche-transfert)"/>
+<line x1="334.4" y1="330.0" x2="364.0" y2="330.0" class="segment-transfert" marker-end="url(#fleche-transfert)"/>
+<line x1="372.9" y1="354.0" x2="390.7" y2="354.0" class="segment-reprise"/>
+<line x1="405.5" y1="378.0" x2="405.5" y2="378.0" class="segment-transfert" marker-end="url(#fleche-transfert)"/>
+<line x1="473.6" y1="402.0" x2="586.1" y2="402.0" class="segment-transfert" marker-end="url(#fleche-transfert)"/>
+<line x1="512.1" y1="426.0" x2="512.1" y2="426.0" class="segment-incertain"/>
+<line x1="541.7" y1="450.0" x2="556.5" y2="450.0" class="segment-transfert" marker-end="url(#fleche-transfert)"/>
+<line x1="553.5" y1="474.0" x2="565.4" y2="474.0" class="segment-transfert" marker-end="url(#fleche-transfert)"/>
+<line x1="559.5" y1="498.0" x2="657.2" y2="498.0" class="segment-transfert" marker-end="url(#fleche-transfert)"/>
+<line x1="592.0" y1="522.0" x2="645.3" y2="522.0" class="segment-transfert" marker-end="url(#fleche-transfert)"/>
+<line x1="598.0" y1="546.0" x2="713.5" y2="546.0" class="segment-transfert" marker-end="url(#fleche-transfert)"/>
+<line x1="686.8" y1="570.0" x2="760.8" y2="570.0" class="segment-reprise"/>
+<line x1="719.4" y1="594.0" x2="743.1" y2="594.0" class="segment-transfert" marker-end="url(#fleche-transfert)"/>
+<line x1="740.1" y1="618.0" x2="760.8" y2="618.0" class="segment-transfert" marker-end="url(#fleche-transfert)"/>
+<line x1="781.6" y1="642.0" x2="837.8" y2="642.0" class="segment-transfert" marker-end="url(#fleche-transfert)"/>
+<circle class="point-frise" data-i="0" cx="426.2" cy="42.0" r="4.5"/>
+<circle class="point-frise" data-i="1" cx="429.2" cy="42.0" r="4.5"/>
+<circle class="point-frise" data-i="2" cx="444.0" cy="42.0" r="4.5"/>
+<circle class="point-frise" data-i="3" cx="449.9" cy="42.0" r="4.5"/>
+<circle class="point-frise" data-i="4" cx="449.9" cy="42.0" r="4.5"/>
+<circle class="point-frise" data-i="5" cx="479.5" cy="42.0" r="4.5"/>
+<circle class="point-frise" data-i="6" cx="521.0" cy="42.0" r="4.5"/>
+<circle class="point-frise" data-i="7" cx="562.4" cy="42.0" r="4.5"/>
+<circle class="point-frise" data-i="8" cx="592.0" cy="42.0" r="4.5"/>
+<circle class="point-frise" data-i="9" cx="627.6" cy="42.0" r="4.5"/>
+<circle class="point-frise" data-i="10" cx="683.8" cy="42.0" r="4.5"/>
+<circle class="point-frise" data-i="11" cx="408.4" cy="66.0" r="4.5"/>
+<circle class="point-frise" data-i="12" cx="408.4" cy="66.0" r="4.5"/>
+<circle class="point-frise" data-i="13" cx="414.3" cy="66.0" r="4.5"/>
+<circle class="point-frise" data-i="14" cx="429.2" cy="66.0" r="4.5"/>
+<circle class="point-frise" data-i="15" cx="446.9" cy="66.0" r="4.5"/>
+<circle class="point-frise" data-i="16" cx="458.8" cy="66.0" r="4.5"/>
+<circle class="point-frise" data-i="17" cx="458.8" cy="66.0" r="4.5"/>
+<circle class="point-frise" data-i="18" cx="464.7" cy="66.0" r="4.5"/>
+<circle class="point-frise" data-i="19" cx="485.4" cy="66.0" r="4.5"/>
+<circle class="point-frise" data-i="20" cx="488.4" cy="66.0" r="4.5"/>
+<circle class="point-frise" data-i="21" cx="269.2" cy="90.0" r="4.5"/>
+<circle class="point-frise" data-i="22" cx="287.0" cy="90.0" r="4.5"/>
+<circle class="point-frise" data-i="23" cx="287.0" cy="90.0" r="4.5"/>
+<circle class="point-frise" data-i="24" cx="292.9" cy="90.0" r="4.5"/>
+<circle class="point-frise" data-i="25" cx="295.9" cy="90.0" r="4.5"/>
+<circle class="point-frise" data-i="26" cx="319.6" cy="90.0" r="4.5"/>
+<circle class="point-frise" data-i="27" cx="452.8" cy="114.0" r="4.5"/>
+<circle class="point-frise" data-i="28" cx="497.3" cy="114.0" r="4.5"/>
+<circle class="point-frise" data-i="29" cx="500.2" cy="114.0" r="4.5"/>
+<circle class="point-frise" data-i="30" cx="500.2" cy="114.0" r="4.5"/>
+<circle class="point-frise" data-i="31" cx="606.8" cy="114.0" r="4.5"/>
+<circle class="point-frise" data-i="32" cx="651.3" cy="138.0" r="4.5"/>
+<circle class="point-frise" data-i="33" cx="831.9" cy="138.0" r="4.5"/>
+<circle class="point-frise" data-i="34" cx="858.6" cy="138.0" r="4.5"/>
+<circle class="point-frise" data-i="35" cx="885.2" cy="138.0" r="4.5"/>
+<circle class="point-frise" data-i="36" cx="911.9" cy="138.0" r="4.5"/>
+<circle class="point-frise" data-i="37" cx="553.5" cy="162.0" r="4.5"/>
+<circle class="point-frise" data-i="38" cx="565.4" cy="162.0" r="4.5"/>
+<circle class="point-frise" data-i="39" cx="577.2" cy="162.0" r="4.5"/>
+<circle class="point-frise" data-i="40" cx="583.2" cy="162.0" r="4.5"/>
+<circle class="point-frise" data-i="41" cx="218.9" cy="186.0" r="4.5"/>
+<circle class="point-frise" data-i="42" cx="227.8" cy="186.0" r="4.5"/>
+<circle class="point-frise" data-i="43" cx="236.7" cy="186.0" r="4.5"/>
+<circle class="point-frise" data-i="44" cx="426.2" cy="210.0" r="4.5"/>
+<circle class="point-frise" data-i="45" cx="449.9" cy="210.0" r="4.5"/>
+<circle class="point-frise" data-i="46" cx="461.7" cy="210.0" r="4.5"/>
+<circle class="point-frise" data-i="47" cx="811.2" cy="234.0" r="4.5"/>
+<circle class="point-frise" data-i="48" cx="811.2" cy="234.0" r="4.5"/>
+<circle class="point-frise" data-i="49" cx="811.2" cy="234.0" r="4.5"/>
+<circle class="point-frise" data-i="50" cx="823.0" cy="258.0" r="4.5"/>
+<circle class="point-frise" data-i="51" cx="823.0" cy="258.0" r="4.5"/>
+<circle class="point-frise" data-i="52" cx="823.0" cy="258.0" r="4.5"/>
+<circle class="point-frise" data-i="53" cx="230.7" cy="282.0" r="4.5"/>
+<circle class="point-frise" data-i="54" cx="242.6" cy="282.0" r="4.5"/>
+<circle class="point-frise" data-i="55" cx="319.6" cy="306.0" r="4.5"/>
+<circle class="point-frise" data-i="56" cx="322.5" cy="306.0" r="4.5"/>
+<circle class="point-frise" data-i="57" cx="334.4" cy="330.0" r="4.5"/>
+<circle class="point-frise" data-i="58" cx="364.0" cy="330.0" r="4.5"/>
+<circle class="point-frise" data-i="59" cx="372.9" cy="354.0" r="4.5"/>
+<circle class="point-frise" data-i="60" cx="390.7" cy="354.0" r="4.5"/>
+<circle class="point-frise" data-i="61" cx="405.5" cy="378.0" r="4.5"/>
+<circle class="point-frise" data-i="62" cx="405.5" cy="378.0" r="4.5"/>
+<circle class="point-frise" data-i="63" cx="473.6" cy="402.0" r="4.5"/>
+<circle class="point-frise" data-i="64" cx="586.1" cy="402.0" r="4.5"/>
+<circle class="point-frise" data-i="65" cx="512.1" cy="426.0" r="4.5"/>
+<circle class="point-frise" data-i="66" cx="512.1" cy="426.0" r="4.5"/>
+<circle class="point-frise" data-i="67" cx="541.7" cy="450.0" r="4.5"/>
+<circle class="point-frise" data-i="68" cx="556.5" cy="450.0" r="4.5"/>
+<circle class="point-frise" data-i="69" cx="553.5" cy="474.0" r="4.5"/>
+<circle class="point-frise" data-i="70" cx="565.4" cy="474.0" r="4.5"/>
+<circle class="point-frise" data-i="71" cx="559.5" cy="498.0" r="4.5"/>
+<circle class="point-frise" data-i="72" cx="657.2" cy="498.0" r="4.5"/>
+<circle class="point-frise" data-i="73" cx="592.0" cy="522.0" r="4.5"/>
+<circle class="point-frise" data-i="74" cx="645.3" cy="522.0" r="4.5"/>
+<circle class="point-frise" data-i="75" cx="598.0" cy="546.0" r="4.5"/>
+<circle class="point-frise" data-i="76" cx="713.5" cy="546.0" r="4.5"/>
+<circle class="point-frise" data-i="77" cx="686.8" cy="570.0" r="4.5"/>
+<circle class="point-frise" data-i="78" cx="760.8" cy="570.0" r="4.5"/>
+<circle class="point-frise" data-i="79" cx="719.4" cy="594.0" r="4.5"/>
+<circle class="point-frise" data-i="80" cx="743.1" cy="594.0" r="4.5"/>
+<circle class="point-frise" data-i="81" cx="740.1" cy="618.0" r="4.5"/>
+<circle class="point-frise" data-i="82" cx="760.8" cy="618.0" r="4.5"/>
+<circle class="point-frise" data-i="83" cx="781.6" cy="642.0" r="4.5"/>
+<circle class="point-frise" data-i="84" cx="837.8" cy="642.0" r="4.5"/>
+    </svg>
+  </div>
+  <div class="action-tableau">
+    <button class="bascule" id="boutonTableau">Afficher le tableau détaillé</button>
+    <table class="tableau-detaille" id="tableauDetaille">
+      <thead><tr><th>Plaques</th><th>Année</th><th>Ville</th><th>Éditeur</th><th>Titre</th><th>Technique</th><th>Lien</th></tr></thead>
+      <tbody>
+        <tr><td>Solis, Virgil</td><td>1563</td><td>s.l.</td><td>Sigmund Fereyabend</td><td>Iohan. Posthii germershemii tetrasticha in Ovidii Metam. Lib XV</td><td>Bois</td><td><a href="https://gallica.bnf.fr/ark:/12148/btv1b8454722p" target="_blank">voir</a></td></tr>
+<tr><td></td><td>1564</td><td>Francfort-sur-le-Main</td><td>Georg Raben</td><td>P. Ovidii Nasonis dess Sinnreichen vnd hochverstendigen Poeten Metamorphoses</td><td>Bois</td><td><a href="https://www.digitale-sammlungen.de/en/view/bsb00034313?page=,1" target="_blank">voir</a></td></tr>
+<tr><td></td><td>1569</td><td>Francfort</td><td>G. Corvinum, Sigmund Feyerabent et W. Galli</td><td>Johan. Posthii Germershemii Tetrasticha in Ovidii Metam. lib. XV</td><td>Bois</td><td><a href="https://gallica.bnf.fr/ark:/12148/btv1b2200054w" target="_blank">voir</a></td></tr>
+<tr><td></td><td>1571</td><td>Francfort</td><td>Georges Corvin et héritiers  Vuigandi Galli</td><td>Pub. Ouidii Nasonis Metamorphoseon libri XV</td><td>Bois</td><td><a href="https://babel.hathitrust.org/cgi/pt?id=emu.010002482229&seq=1" target="_blank">voir</a></td></tr>
+<tr><td></td><td>1571</td><td>Francfort-sur-le-Main</td><td>Raben, Feyerabend et Han</td><td>P. Ovidii Nasonis dess aller sinnreichsten Poeten Metamorphosis</td><td>Bois</td><td><a href="https://www.digitale-sammlungen.de/en/view/bsb11265476" target="_blank">voir</a></td></tr>
+<tr><td></td><td>1581</td><td>Francfort-sur-le-Main</td><td>Johann Feyerabendt (in verlegung Sigmund Feyerabendts)</td><td>P. Ovidii Metamorphosis, Oder Wunderbarliche und seltzame Beschreibung</td><td>Bois</td><td><a href="https://www.digitale-sammlungen.de/de/details/bsb00087854" target="_blank">voir</a></td></tr>
+<tr><td></td><td>1595</td><td>Anvers</td><td>Pedro Bellero</td><td>Las Transformaciones de Ovidio</td><td>Bois</td><td><a href="https://www.manuscriptorium.com/hub/catalog/default/detail/single/manuscriptorium%7CUCM___-UCM___BH_FLL_308332NO62V8-es?lang=cs" target="_blank">voir</a></td></tr>
+<tr><td></td><td>1609</td><td>Francfort-sur-le-Main</td><td>Johann Saurn (in Verlegung Francisci Nicolai Rothen)</td><td>P. Ovidii Metamorphosis oder wunderbarliche vnd seltzame beschreibung</td><td>Bois</td><td><a href="https://www.digitale-sammlungen.de/de/details/bsb10872070" target="_blank">voir</a></td></tr>
+<tr><td></td><td>1619</td><td>Anvers</td><td>G. Leestens</td><td>Die Herscheppinghe</td><td>Bois</td><td><a href="http://www.ovidiuspictus.es/en/visualizacionejemplar.php?clave=79" target="_blank">voir</a></td></tr>
+<tr><td></td><td>1631</td><td>Francfort-sur-le-Main</td><td>Gottfried Tampach (Truckts Caspar Rötel)</td><td>P. Ovidii Metamorphosis oder wunderbarliche vnd seltzame beschreibung</td><td>Bois</td><td><a href="https://www.digitale-sammlungen.de/de/details/bsb10872071" target="_blank">voir</a></td></tr>
+<tr><td></td><td>1650</td><td>Anvers / Rotterdam</td><td>Peeter Beelaert (Men vintseoock te coop. Peeter Van Waesbergen boeckvercooper tot Rotterdam)</td><td>Die Herscheppinghe</td><td>Bois</td><td><a href="https://biblio.bnu.fr/opac/resource/metamorphosis-dat-is-die-herscheppinghe-oft-veranderinghe-beschreven-vanden-vermaerden-ende-gheleerd/BUS3837738" target="_blank">voir</a></td></tr>
+<tr><td>Salomon, Bernard</td><td>1557</td><td>Lyon</td><td>Jean de Tournes</td><td>La Metamorphose figurée</td><td>Bois</td><td><a href="https://gallica.bnf.fr/ark:/12148/btv1b2200047r" target="_blank">voir</a></td></tr>
+<tr><td></td><td>1557</td><td>Lyon</td><td>Jean de Tournes</td><td>Excellente figueren</td><td>Bois</td><td><a href="https://books.google.fr/books?id=izdoAAAAcAAJ&printsec=frontcover&hl=fr&source=gbs_ge_summary_r&cad=0#v=onepage&q&f=false" target="_blank">voir</a></td></tr>
+<tr><td></td><td>1559</td><td>Lyon</td><td>Jean de Tournes</td><td>La vita et metamorfoseo d'Ovidio</td><td>Bois</td><td><a href="https://gallica.bnf.fr/ark:/12148/btv1b22000485" target="_blank">voir</a></td></tr>
+<tr><td></td><td>1564</td><td>Lyon</td><td>Jean de Tournes</td><td>La Metamorphose figurée</td><td>Bois</td><td><a href="https://gallica.bnf.fr/ark:/12148/bpt6k8701267g" target="_blank">voir</a></td></tr>
+<tr><td></td><td>1570</td><td>Paris</td><td>Henri de Marnef et Guillaume Cavellat</td><td>Metamorphoses Ovidii</td><td>Bois</td><td><a href="https://gallica.bnf.fr/ark:/12148/bpt6k8708104s" target="_blank">voir</a></td></tr>
+<tr><td></td><td>1574</td><td>Paris</td><td>Henri de Marnef et Guillaume Cavellat</td><td>Olympe des histoires poétiques</td><td>Bois</td><td><a href="https://gallica.bnf.fr/ark:/12148/bpt6k8710284z/f1.planchecontact" target="_blank">voir</a></td></tr>
+<tr><td></td><td>1574</td><td>Paris</td><td>Henri de Marnef et Guillaume Cavellat</td><td>Pub. Ovidii Nasonis Metamorphoseon libri XV</td><td>Bois</td><td><a href="https://gallica.bnf.fr/ark:/12148/bpt6k87081056" target="_blank">voir</a></td></tr>
+<tr><td></td><td>1576</td><td>Paris</td><td>Henri de Marnef et Guillaume Cavellat</td><td>Pub. Ovidii Nasonis Metamorphoseon libri XV</td><td>Bois</td><td><a href="https://gallica.bnf.fr/ark:/12148/bpt6k87081056" target="_blank">voir</a></td></tr>
+<tr><td></td><td>1583</td><td>Paris</td><td>Henri de Marnef et Guillaume Cavellat</td><td>Metamorphoses Ovidii… per Sprengium</td><td>Bois</td><td><a href="https://gallica.bnf.fr/ark:/12148/bpt6k87079136" target="_blank">voir</a></td></tr>
+<tr><td></td><td>1584</td><td>Lyon</td><td>Jean de Tournes</td><td>La vita et metamorfoseo d'Ovidio</td><td>Bois</td><td><a href="https://gallica.bnf.fr/ark:/12148/bpt6k8708126c" target="_blank">voir</a></td></tr>
+<tr><td>Leroy II, Guillaume</td><td>1510</td><td>Lyon</td><td>Stéphane Gueynard</td><td>P. Ovidii Nasonis Metamorphoseos libri moralizati</td><td>Bois</td><td><a href="https://gallica.bnf.fr/ark:/12148/bpt6k87102394" target="_blank">voir</a></td></tr>
+<tr><td></td><td>1516</td><td>Venise</td><td>Lucantonio Giunta (Johannes Rubeus Vercellensis pour...)</td><td>P. Ovidii Nasonis Metamorphoseos libri moralizati</td><td>Bois</td><td><a href="https://www.digitale-sammlungen.de/en/view/bsb10198255" target="_blank">voir</a></td></tr>
+<tr><td></td><td>1516</td><td>Lyon</td><td>J. Huguetan</td><td>P. Ovidii Nasonis Metamorphoseos libri moralizati</td><td>Bois</td><td><a href="http://www.ovidiuspictus.es/en/visualizacionejemplar.php?clave=146" target="_blank">voir</a></td></tr>
+<tr><td></td><td>1518</td><td>Lyon</td><td>J. Huguetan</td><td>P. Ovidii Nasonis Metamorphoseos libri moralizati</td><td>Bois</td><td><a href="https://www.digitale-sammlungen.de/en/view/bsb10198256?page=,1" target="_blank">voir</a></td></tr>
+<tr><td></td><td>1519</td><td>Lyon</td><td>Jacob Mareschal</td><td>P. Ovidii Nasonis Metamorphoseos libri moralizati</td><td>Bois</td><td><a href="https://gallica.bnf.fr/ark:/12148/bpt6k87093449" target="_blank">voir</a></td></tr>
+<tr><td></td><td>1527</td><td>Lyon</td><td>Jean Crespin</td><td>Publii Ouidii Nasonis Sulmonensis Metamorphoseos Librorum XV</td><td>Bois</td><td><a href="http://www.ovidiuspictus.es/en/visualizacionejemplar.php?clave=106" target="_blank">voir</a></td></tr>
+<tr><td>Anonyme1572</td><td>1572</td><td>Venise</td><td>Francesco de' Franceschi</td><td>Le Metamorfosi di Ovidio</td><td>Bois</td><td><a href="https://www.manuscriptorium.com/hub/catalog/default/detail/single/manuscriptorium%7CNKCR__-NKCR__6_K_000088__0JZOTWA-cs?lang=cs" target="_blank">voir</a></td></tr>
+<tr><td></td><td>1587</td><td>Venise</td><td>Pietro Deuchino</td><td>Le Metamorfosi di Ovidio</td><td>Bois</td><td><a href="https://www.digitale-sammlungen.de/en/view/bsb10171191?page=11" target="_blank">voir</a></td></tr>
+<tr><td></td><td>1588</td><td>Venise</td><td>Pietro Deuchino (heredi)</td><td>Le Metamorfosi di Ovidio</td><td>Bois</td><td><a href="https://www.digitale-sammlungen.de/de/details/bsb10198265" target="_blank">voir</a></td></tr>
+<tr><td></td><td>1588</td><td>Venise</td><td>s.n.</td><td>Le Metamorfosi di Ovidio</td><td>Bois</td><td><a href="https://www.digitale-sammlungen.de/en/view/bsb10198265?page=13" target="_blank">voir</a></td></tr>
+<tr><td></td><td>1624</td><td>Venise</td><td>s.n.</td><td>Le Metamorfosi di Ovidio</td><td>Bois</td><td><a href="https://www.digitale-sammlungen.de/en/view/bsb10242264?page=7" target="_blank">voir</a></td></tr>
+<tr><td>Baur, Johann Wilhelm,</td><td>1639</td><td>Vienne ?</td><td>s.n.</td><td>album Baur</td><td>Cuivre</td><td><a href="https://www.digitale-sammlungen.de/en/view/bsb10872073?page=,1" target="_blank">voir</a></td></tr>
+<tr><td></td><td>1700</td><td>Ville inconnue</td><td>Novis Impensis Jeremiae Wolffii Chalcographicae artis propolae Augustae Vindelicorum</td><td>album Baur</td><td>Cuivre</td><td><a href="https://www.sudoc.fr/278988970" target="_blank">voir</a></td></tr>
+<tr><td></td><td>1709</td><td>Augsbourg</td><td>s.n.</td><td>Des vortrefflichen römischen Poetens Publii Ovidii Nasonis Metamorphoseon</td><td>Cuivre</td><td><a href="https://www.digitale-sammlungen.de/en/view/bsb10872075?page=,1" target="_blank">voir</a></td></tr>
+<tr><td></td><td>1718</td><td>Nuremberg</td><td>s.n.</td><td>album Baur</td><td>Cuivre</td><td><a href="https://biblio.bnu.fr/opac/resource/ovidii-metamorphosis-oder-verwandelungsbucher-hundert-und-funfzig-neue-kunstreiche-kuppferbildungen-/BUS03965235" target="_blank">voir</a></td></tr>
+<tr><td></td><td>1727</td><td>Nuremberg</td><td>Christoph Riegeln</td><td>album Baur</td><td>Cuivre</td><td></td></tr>
+<tr><td>Gaultier, Léonard</td><td>1606</td><td>Paris</td><td>Matthieu Guillemot</td><td>Les Metamorphoses d´Ovide de nouveau traduites en françois</td><td>Cuivre</td><td><a href="http://www.ovidiuspictus.es/en/visualizacionejemplar.php?clave=47" target="_blank">voir</a></td></tr>
+<tr><td></td><td>1610</td><td>Paris</td><td>Matthieu Guillemot</td><td>Les Metamorphoses d´Ovide de nouveau traduites en françois</td><td>Cuivre</td><td><a href="https://www.digitale-sammlungen.de/en/view/bsb11913284" target="_blank">voir</a></td></tr>
+<tr><td></td><td>1614</td><td>Paris</td><td>Veuve Guillemot</td><td>Les Metamorphoses d´Ovide de nouveau traduites en françois</td><td>Cuivre</td><td><a href="https://gallica.bnf.fr/ark:/12148/bpt6k6277348n" target="_blank">voir</a></td></tr>
+<tr><td></td><td>1616</td><td>[Paris]</td><td>s.n.</td><td>Les Metamorphoses d´Ovide de nouveau traduites en françois</td><td>Cuivre</td><td><a href="https://www.digitale-sammlungen.de/en/view/bsb10242228?page=60," target="_blank">voir</a></td></tr>
+<tr><td>Anonyme1493</td><td>1493</td><td>Paris</td><td>Antoine Vérard</td><td>La Bible des Poètes</td><td>Bois</td><td><a href="https://gallica.bnf.fr/ark:/12148/bpt6k5340318j" target="_blank">voir</a></td></tr>
+<tr><td></td><td>1496</td><td>Paris</td><td>Pierre Regnaul (André Bocard pour...)</td><td>Ovidius Metamorphoseos cum commento familiari</td><td>Bois</td><td><a href="https://gallica.bnf.fr/ark:/12148/bpt6k8710229r/f14.item" target="_blank">voir</a></td></tr>
+<tr><td></td><td>1499</td><td>Paris</td><td>Antoine vérard</td><td>Methamorphoze</td><td>Bois</td><td><a href="https://gallica.bnf.fr/ark:/12148/btv1b2200019f" target="_blank">voir</a></td></tr>
+<tr><td>Anonyme1563</td><td>1563</td><td>Venise</td><td>Francesco de' Franceschi</td><td>Le metamorfosi di Ovidio</td><td>Bois</td><td><a href="https://www.digitale-sammlungen.de/en/view/bsb11217566?page=13" target="_blank">voir</a></td></tr>
+<tr><td></td><td>1571</td><td>Venise</td><td>Francesco de' Franceschi</td><td>Le Metamorfosi di Ovidio</td><td>Bois</td><td><a href="https://gallica.bnf.fr/ark:/12148/bpt6k1914143z" target="_blank">voir</a></td></tr>
+<tr><td></td><td>1575</td><td>Venise</td><td>Francesco de' Franceschi</td><td>Le Metamorfosi di Ovidio</td><td>Bois</td><td><a href="https://www.digitale-sammlungen.de/en/view/bsb11217570?page=11" target="_blank">voir</a></td></tr>
+<tr><td>Anonyme1693</td><td>1693</td><td>Amsterdam</td><td>Pieter Mortier</td><td>Les Metamorphoses d'Ovide, avec des explications à la fin de chaque fable</td><td>Cuivre</td><td><a href="https://www.digitale-sammlungen.de/en/view/bsb10912372?page=1" target="_blank">voir</a></td></tr>
+<tr><td></td><td>1693</td><td>Amsterdam</td><td>Pieter Mortier</td><td>Les Metamorphoses d'Ovide, avec des explications à la fin de chaque fable</td><td>Cuivre</td><td><a href="https://gallica.bnf.fr/ark:/12148/bpt6k8728031w" target="_blank">voir</a></td></tr>
+<tr><td></td><td>1693</td><td>Amsterdam</td><td>Pieter Mortier</td><td>Les Metamorphoses d'Ovide, avec des explications à la fin de chaque fable</td><td>Cuivre</td><td><a href="https://gallica.bnf.fr/ark:/12148/bpt6k8728069b" target="_blank">voir</a></td></tr>
+<tr><td>monogrammiste H.T.</td><td>1697</td><td>Lyon</td><td>Horace Molin</td><td>Les Oeuvres d’Ovide par Monsieur de Martignac</td><td>Cuivre</td><td><a href="http://www.ovidiuspictus.es/en/listadoejemplares.php?de=edicion&clave=30" target="_blank">voir</a></td></tr>
+<tr><td></td><td>1697</td><td>Lyon</td><td>Horace Molin</td><td>Les Oeuvres d’Ovide par Monsieur de Martignac</td><td>Cuivre</td><td><a href="http://www.ovidiuspictus.es/en/listadoejemplares.php?de=edicion&clave=31" target="_blank">voir</a></td></tr>
+<tr><td></td><td>1697</td><td>Lyon</td><td>Horace Molin</td><td>Les Oeuvres d’Ovide par Monsieur de Martignac</td><td>Cuivre</td><td><a href="https://babel.hathitrust.org/cgi/pt?id=ucm.5323841268&seq=7" target="_blank">voir</a></td></tr>
+<tr><td>Anonyme1497</td><td>1497</td><td>Venise</td><td>Zoane Rosso</td><td>Ovidio methamorphoseos vulgare</td><td>Bois</td><td><a href="https://gallica.bnf.fr/ark:/12148/btv1b22000181/f1.item" target="_blank">voir</a></td></tr>
+<tr><td></td><td>1501</td><td>Venise</td><td>C. de Pensa</td><td>Ovidio Metamorphoseos vulgare</td><td>Bois</td><td><a href="https://gallica.bnf.fr/ark:/12148/btv1b22000507" target="_blank">voir</a></td></tr>
+<tr><td>Anonyme1527</td><td>1527</td><td>Lyon</td><td>Antoine Blanchard</td><td>Publii Ovidii Nasonis Sulmonensis Metamorphoseos Librorum xv</td><td>Bois</td><td><a href="https://babel.hathitrust.org/cgi/pt?id=ucm.5327231213&seq=1" target="_blank">voir</a></td></tr>
+<tr><td></td><td>1528</td><td>Lyon</td><td>Antoine Du Ry</td><td>Textus Ovidii Metamorpho. Lib. XV</td><td>Bois</td><td><a href="http://www.ovidiuspictus.es/en/visualizacionejemplar.php?clave=150" target="_blank">voir</a></td></tr>
+<tr><td>Anonyme1532</td><td>1532</td><td>Lyon</td><td>Romain Morin et Denis de Harsy</td><td>Le Grand Olympe</td><td>Bois</td><td><a href="https://gallica.bnf.fr/ark:/12148/btv1b8600297j" target="_blank">voir</a></td></tr>
+<tr><td></td><td>1542</td><td>Lyon</td><td>Denis de Harsy</td><td>P. Ovidii Nasonis Metamorphoseon, hoc est Transformationum, libri XV</td><td>Bois</td><td><a href="http://www.ovidiuspictus.es/en/visualizacionejemplar.php?clave=149" target="_blank">voir</a></td></tr>
+<tr><td>Wickram, Jörg (1505?-1560?)</td><td>1545</td><td>Mayence (Meinz)</td><td>Ivo Schöffer</td><td>P. Ovidii Nasonis dess aller sinnreichsten Poeten Metamorphosis</td><td>Bois</td><td><a href="https://www.digitale-sammlungen.de/de/details/bsb10139926" target="_blank">voir</a></td></tr>
+<tr><td></td><td>1551</td><td>Mayence (Meinz)</td><td>Ivo Schöffer</td><td>P. Ovidii Nasonis dess aller sinnreichsten Poeten Metamorphosis</td><td>Bois</td><td><a href="https://www.digitale-sammlungen.de/en/view/bsb11924456?page=,1" target="_blank">voir</a></td></tr>
+<tr><td>Eskrich, Pierre</td><td>1556</td><td>Lyon</td><td>Guillaume Rouillé</td><td>Trois Premiers livres de la Métamorphose d'Ovide</td><td>Bois</td><td><a href="https://gallica.bnf.fr/ark:/12148/btv1b22000559" target="_blank">voir</a></td></tr>
+<tr><td></td><td>1556</td><td>Lyon</td><td>Macé Bonhomme</td><td>Trois Premiers livres de la Métamorphose d'Ovide</td><td>Bois</td><td><a href="https://gallica.bnf.fr/ark:/12148/bpt6k8709995p" target="_blank">voir</a></td></tr>
+<tr><td>Anonyme1579</td><td>1579</td><td>Venise</td><td>Marc'Antonio Zaltieri</td><td>Le Metamorfosi di Ovidio</td><td>Bois</td><td><a href="https://babel.hathitrust.org/cgi/pt?id=ucm.5324255972" target="_blank">voir</a></td></tr>
+<tr><td></td><td>1617</td><td>s.l.</td><td>Fr Čapek (appresso Giorgio Valentini)</td><td>Le Metamorfosi di Ovidio</td><td>Bois</td><td><a href="https://www.manuscriptorium.com/hub/catalog/default/detail/single/manuscriptorium%7CNKCR__-NKCR__6_K_000155__42M3NCD-cs?lang=cs" target="_blank">voir</a></td></tr>
+<tr><td>Anonyme1592</td><td>1592</td><td>Venise</td><td>Bernardo Giunta</td><td>Le Metamorfosi di Ovidio</td><td>Bois</td><td><a href="https://www.digitale-sammlungen.de/en/view/bsb11214794?page=,1" target="_blank">voir</a></td></tr>
+<tr><td></td><td>1592</td><td>Venise</td><td>s.n.</td><td>Le Metamorfosi di Ovidio</td><td>Bois</td><td><a href="https://www.digitale-sammlungen.de/en/view/bsb10198266" target="_blank">voir</a></td></tr>
+<tr><td>Passe, Crispin de</td><td>1602</td><td>[Köln]</td><td>Crispin de Passe</td><td>Metamorphoseon Ovidianarum per Crispianum Passaeum</td><td>Cuivre</td><td><a href="https://gallica.bnf.fr/ark:/12148/bpt6k15218623" target="_blank">voir</a></td></tr>
+<tr><td></td><td>1607</td><td>Arnhemii</td><td>J. Jansonius</td><td>P. Ovid. Nasonis XV Metamorphoseon librorum figurae</td><td>Cuivre</td><td><a href="https://gallica.bnf.fr/ark:/12148/bpt6k1522448r/f1.planchecontact" target="_blank">voir</a></td></tr>
+<tr><td>Tempesta, Antonio</td><td>1606</td><td>Anvers</td><td>Peter de Jode</td><td>Metamorphoseon Sive Transformationvm Ovidianarvm ab Antonio Tempesta Florentino incisi</td><td>Cuivre</td><td><a href="https://gallica.bnf.fr/ark:/12148/btv1b54000051z" target="_blank">voir</a></td></tr>
+<tr><td></td><td>1610</td><td>Amsterdam</td><td>J. Jansonius</td><td>Metamorphoseon Sive Transformationvm Ovidianarvm ab Antonio Tempesta Florentino incisi</td><td>Cuivre</td><td><a href="https://www.digitale-sammlungen.de/en/view/bsb00008186" target="_blank">voir</a></td></tr>
+<tr><td>Anonyme1608</td><td>1608</td><td>Rouen</td><td>Théodore Reinsart</td><td>Olympe des histoires poétiques</td><td>Bois</td><td><a href="https://babel.hathitrust.org/cgi/pt?id=gri.ark:/13960/t9k40tp38&seq=7" target="_blank">voir</a></td></tr>
+<tr><td></td><td>1641</td><td>Rouen</td><td>David Ferrand</td><td>Les Figures des Metamorphoses</td><td>Bois</td><td><a href="https://gallica.bnf.fr/ark:/12148/bpt6k15034406" target="_blank">voir</a></td></tr>
+<tr><td>Mathieu, Jean et autres</td><td>1619</td><td>Paris</td><td>Veuve L'Angelier</td><td>Les Metamorphoses d´Ovide de nouveau traduites en françois</td><td>Cuivre</td><td><a href="https://gallica.bnf.fr/ark:/12148/btv1b22000826" target="_blank">voir</a></td></tr>
+<tr><td></td><td>1637</td><td>Paris</td><td>Pierre Billaine</td><td>Les Metamorphoses d´Ovide de nouveau traduites en françois</td><td>Cuivre</td><td><a href="https://gallica.bnf.fr/ark:/12148/bpt6k87019014" target="_blank">voir</a></td></tr>
+<tr><td>Moncornet, Baltazar</td><td>1621</td><td>Paris</td><td>Baltazar Moncornet</td><td>Metamorphosis, sive transformationes Ovidianae iconibus repraesentatae</td><td>Cuivre</td><td><a href="https://gallica.bnf.fr/ark:/12148/bpt6k1520386g" target="_blank">voir</a></td></tr>
+<tr><td></td><td>1660</td><td>Paris</td><td>Antoine de Sommaville</td><td>Les Metamorphoses d'Ovide... par Du Ryer</td><td>Cuivre</td><td><a href="https://gallica.bnf.fr/ark:/12148/bpt6k87045023" target="_blank">voir</a></td></tr>
+<tr><td>Blanchin, Jean</td><td>1651</td><td>Rouen</td><td>Jean Berthelin</td><td>Les Metamorphoses d´Ovide de nouveau traduites en françois</td><td>Cuivre</td><td><a href="http://www.ovidiuspictus.es/en/listadoejemplares.php?de=edicion&clave=18" target="_blank">voir</a></td></tr>
+<tr><td></td><td>1676</td><td>Rouen</td><td>Jean Berthelin</td><td>Les Metamorphoses d'Ovide... par Du Ryer</td><td>Cuivre</td><td><a href="http://www.ovidiuspictus.es/en/visualizacionejemplar.php?clave=34" target="_blank">voir</a></td></tr>
+<tr><td>Philippe, Pierre</td><td>1662</td><td>Leyde</td><td>Peter Leffen</td><td>Opera omnia</td><td>Cuivre</td><td><a href="http://www.ovidiuspictus.es/en/listadoejemplares.php?de=edicion&clave=22" target="_blank">voir</a></td></tr>
+<tr><td></td><td>1670</td><td>Leyde</td><td>Officina Hackiana</td><td>Opera omnia</td><td>Cuivre</td><td><a href="http://www.ovidiuspictus.es/en/listadoejemplares.php?de=edicion&clave=4" target="_blank">voir</a></td></tr>
+<tr><td>Weyen, Laurent</td><td>1669</td><td>Paris</td><td>Claude Barbin</td><td>Les Métamorphoses d´Ovide traduites par T. Corneille</td><td>Cuivre</td><td><a href="http://www.ovidiuspictus.es/en/listadoejemplares.php?de=edicion&clave=78" target="_blank">voir</a></td></tr>
+<tr><td></td><td>1676</td><td>Paris</td><td>Etienne Loyson</td><td>Les Metamorphoses d'Ovide... par Du Ryer</td><td>Cuivre</td><td><a href="https://babel.hathitrust.org/cgi/pt?id=hvd.hn64uf&seq=20" target="_blank">voir</a></td></tr>
+<tr><td>Mulder, Joseph</td><td>1683</td><td>Amsterdam</td><td>Blaeu (« Typographia Blaviana »)</td><td>P. Ovidii Nasonis opera omnia</td><td>Cuivre</td><td><a href="http://www.ovidiuspictus.es/en/listadoejemplares.php?de=edicion&clave=35" target="_blank">voir</a></td></tr>
+<tr><td></td><td>1702</td><td>Amsterdam</td><td>Rembertus Goethals, Johannes II Janssonius van Waesberge et Hendrick Boom</td><td>P. Ovidii Nasonis Opera Omnia</td><td>Cuivre</td><td><a href="http://www.ovidiuspictus.es/en/listadoejemplares.php?de=edicion&clave=76" target="_blank">voir</a></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="infobulle" id="infobulle"></div>
+</div>
+<script>
+  const points = [{"fx": 426.2, "fy": 42.0, "graveur": "Solis, Virgil", "annee": 1563, "titre": "Iohan. Posthii germershemii tetrasticha in Ovidii Metam. Lib XV", "ville": "s.l.", "editeur": "Sigmund Fereyabend", "technique": "bois", "lien": "https://gallica.bnf.fr/ark:/12148/btv1b8454722p"}, {"fx": 429.2, "fy": 42.0, "graveur": "Solis, Virgil", "annee": 1564, "titre": "P. Ovidii Nasonis dess Sinnreichen vnd hochverstendigen Poeten Metamorphoses", "ville": "Francfort-sur-le-Main", "editeur": "Georg Raben", "technique": "bois", "lien": "https://www.digitale-sammlungen.de/en/view/bsb00034313?page=,1"}, {"fx": 444.0, "fy": 42.0, "graveur": "Solis, Virgil", "annee": 1569, "titre": "Johan. Posthii Germershemii Tetrasticha in Ovidii Metam. lib. XV", "ville": "Francfort", "editeur": "G. Corvinum, Sigmund Feyerabent et W. Galli", "technique": "bois", "lien": "https://gallica.bnf.fr/ark:/12148/btv1b2200054w"}, {"fx": 449.9, "fy": 42.0, "graveur": "Solis, Virgil", "annee": 1571, "titre": "Pub. Ouidii Nasonis Metamorphoseon libri XV", "ville": "Francfort", "editeur": "Georges Corvin et héritiers  Vuigandi Galli", "technique": "bois", "lien": "https://babel.hathitrust.org/cgi/pt?id=emu.010002482229&seq=1"}, {"fx": 449.9, "fy": 42.0, "graveur": "Solis, Virgil", "annee": 1571, "titre": "P. Ovidii Nasonis dess aller sinnreichsten Poeten Metamorphosis", "ville": "Francfort-sur-le-Main", "editeur": "Raben, Feyerabend et Han", "technique": "bois", "lien": "https://www.digitale-sammlungen.de/en/view/bsb11265476"}, {"fx": 479.5, "fy": 42.0, "graveur": "Solis, Virgil", "annee": 1581, "titre": "P. Ovidii Metamorphosis, Oder Wunderbarliche und seltzame Beschreibung", "ville": "Francfort-sur-le-Main", "editeur": "Johann Feyerabendt (in verlegung Sigmund Feyerabendts)", "technique": "bois", "lien": "https://www.digitale-sammlungen.de/de/details/bsb00087854"}, {"fx": 521.0, "fy": 42.0, "graveur": "Solis, Virgil", "annee": 1595, "titre": "Las Transformaciones de Ovidio", "ville": "Anvers", "editeur": "Pedro Bellero", "technique": "bois", "lien": "https://www.manuscriptorium.com/hub/catalog/default/detail/single/manuscriptorium%7CUCM___-UCM___BH_FLL_308332NO62V8-es?lang=cs"}, {"fx": 562.4, "fy": 42.0, "graveur": "Solis, Virgil", "annee": 1609, "titre": "P. Ovidii Metamorphosis oder wunderbarliche vnd seltzame beschreibung", "ville": "Francfort-sur-le-Main", "editeur": "Johann Saurn (in Verlegung Francisci Nicolai Rothen)", "technique": "bois", "lien": "https://www.digitale-sammlungen.de/de/details/bsb10872070"}, {"fx": 592.0, "fy": 42.0, "graveur": "Solis, Virgil", "annee": 1619, "titre": "Die Herscheppinghe", "ville": "Anvers", "editeur": "G. Leestens", "technique": "bois", "lien": "http://www.ovidiuspictus.es/en/visualizacionejemplar.php?clave=79"}, {"fx": 627.6, "fy": 42.0, "graveur": "Solis, Virgil", "annee": 1631, "titre": "P. Ovidii Metamorphosis oder wunderbarliche vnd seltzame beschreibung", "ville": "Francfort-sur-le-Main", "editeur": "Gottfried Tampach (Truckts Caspar Rötel)", "technique": "bois", "lien": "https://www.digitale-sammlungen.de/de/details/bsb10872071"}, {"fx": 683.8, "fy": 42.0, "graveur": "Solis, Virgil", "annee": 1650, "titre": "Die Herscheppinghe", "ville": "Anvers / Rotterdam", "editeur": "Peeter Beelaert (Men vintseoock te coop. Peeter Van Waesbergen boeckvercooper tot Rotterdam)", "technique": "bois", "lien": "https://biblio.bnu.fr/opac/resource/metamorphosis-dat-is-die-herscheppinghe-oft-veranderinghe-beschreven-vanden-vermaerden-ende-gheleerd/BUS3837738"}, {"fx": 408.4, "fy": 66.0, "graveur": "Salomon, Bernard", "annee": 1557, "titre": "La Metamorphose figurée", "ville": "Lyon", "editeur": "Jean de Tournes", "technique": "bois", "lien": "https://gallica.bnf.fr/ark:/12148/btv1b2200047r"}, {"fx": 408.4, "fy": 66.0, "graveur": "Salomon, Bernard", "annee": 1557, "titre": "Excellente figueren", "ville": "Lyon", "editeur": "Jean de Tournes", "technique": "bois", "lien": "https://books.google.fr/books?id=izdoAAAAcAAJ&printsec=frontcover&hl=fr&source=gbs_ge_summary_r&cad=0#v=onepage&q&f=false"}, {"fx": 414.3, "fy": 66.0, "graveur": "Salomon, Bernard", "annee": 1559, "titre": "La vita et metamorfoseo d'Ovidio", "ville": "Lyon", "editeur": "Jean de Tournes", "technique": "bois", "lien": "https://gallica.bnf.fr/ark:/12148/btv1b22000485"}, {"fx": 429.2, "fy": 66.0, "graveur": "Salomon, Bernard", "annee": 1564, "titre": "La Metamorphose figurée", "ville": "Lyon", "editeur": "Jean de Tournes", "technique": "bois", "lien": "https://gallica.bnf.fr/ark:/12148/bpt6k8701267g"}, {"fx": 446.9, "fy": 66.0, "graveur": "Salomon, Bernard", "annee": 1570, "titre": "Metamorphoses Ovidii", "ville": "Paris", "editeur": "Henri de Marnef et Guillaume Cavellat", "technique": "bois", "lien": "https://gallica.bnf.fr/ark:/12148/bpt6k8708104s"}, {"fx": 458.8, "fy": 66.0, "graveur": "Salomon, Bernard", "annee": 1574, "titre": "Olympe des histoires poétiques", "ville": "Paris", "editeur": "Henri de Marnef et Guillaume Cavellat", "technique": "bois", "lien": "https://gallica.bnf.fr/ark:/12148/bpt6k8710284z/f1.planchecontact"}, {"fx": 458.8, "fy": 66.0, "graveur": "Salomon, Bernard", "annee": 1574, "titre": "Pub. Ovidii Nasonis Metamorphoseon libri XV", "ville": "Paris", "editeur": "Henri de Marnef et Guillaume Cavellat", "technique": "bois", "lien": "https://gallica.bnf.fr/ark:/12148/bpt6k87081056"}, {"fx": 464.7, "fy": 66.0, "graveur": "Salomon, Bernard", "annee": 1576, "titre": "Pub. Ovidii Nasonis Metamorphoseon libri XV", "ville": "Paris", "editeur": "Henri de Marnef et Guillaume Cavellat", "technique": "bois", "lien": "https://gallica.bnf.fr/ark:/12148/bpt6k87081056"}, {"fx": 485.4, "fy": 66.0, "graveur": "Salomon, Bernard", "annee": 1583, "titre": "Metamorphoses Ovidii… per Sprengium", "ville": "Paris", "editeur": "Henri de Marnef et Guillaume Cavellat", "technique": "bois", "lien": "https://gallica.bnf.fr/ark:/12148/bpt6k87079136"}, {"fx": 488.4, "fy": 66.0, "graveur": "Salomon, Bernard", "annee": 1584, "titre": "La vita et metamorfoseo d'Ovidio", "ville": "Lyon", "editeur": "Jean de Tournes", "technique": "bois", "lien": "https://gallica.bnf.fr/ark:/12148/bpt6k8708126c"}, {"fx": 269.2, "fy": 90.0, "graveur": "Leroy II, Guillaume", "annee": 1510, "titre": "P. Ovidii Nasonis Metamorphoseos libri moralizati", "ville": "Lyon", "editeur": "Stéphane Gueynard", "technique": "bois", "lien": "https://gallica.bnf.fr/ark:/12148/bpt6k87102394"}, {"fx": 287.0, "fy": 90.0, "graveur": "Leroy II, Guillaume", "annee": 1516, "titre": "P. Ovidii Nasonis Metamorphoseos libri moralizati", "ville": "Venise", "editeur": "Lucantonio Giunta (Johannes Rubeus Vercellensis pour...)", "technique": "bois", "lien": "https://www.digitale-sammlungen.de/en/view/bsb10198255"}, {"fx": 287.0, "fy": 90.0, "graveur": "Leroy II, Guillaume", "annee": 1516, "titre": "P. Ovidii Nasonis Metamorphoseos libri moralizati", "ville": "Lyon", "editeur": "J. Huguetan", "technique": "bois", "lien": "http://www.ovidiuspictus.es/en/visualizacionejemplar.php?clave=146"}, {"fx": 292.9, "fy": 90.0, "graveur": "Leroy II, Guillaume", "annee": 1518, "titre": "P. Ovidii Nasonis Metamorphoseos libri moralizati", "ville": "Lyon", "editeur": "J. Huguetan", "technique": "bois", "lien": "https://www.digitale-sammlungen.de/en/view/bsb10198256?page=,1"}, {"fx": 295.9, "fy": 90.0, "graveur": "Leroy II, Guillaume", "annee": 1519, "titre": "P. Ovidii Nasonis Metamorphoseos libri moralizati", "ville": "Lyon", "editeur": "Jacob Mareschal", "technique": "bois", "lien": "https://gallica.bnf.fr/ark:/12148/bpt6k87093449"}, {"fx": 319.6, "fy": 90.0, "graveur": "Leroy II, Guillaume", "annee": 1527, "titre": "Publii Ouidii Nasonis Sulmonensis Metamorphoseos Librorum XV", "ville": "Lyon", "editeur": "Jean Crespin", "technique": "bois", "lien": "http://www.ovidiuspictus.es/en/visualizacionejemplar.php?clave=106"}, {"fx": 452.8, "fy": 114.0, "graveur": "Anonyme1572", "annee": 1572, "titre": "Le Metamorfosi di Ovidio", "ville": "Venise", "editeur": "Francesco de' Franceschi", "technique": "bois", "lien": "https://www.manuscriptorium.com/hub/catalog/default/detail/single/manuscriptorium%7CNKCR__-NKCR__6_K_000088__0JZOTWA-cs?lang=cs"}, {"fx": 497.3, "fy": 114.0, "graveur": "Anonyme1572", "annee": 1587, "titre": "Le Metamorfosi di Ovidio", "ville": "Venise", "editeur": "Pietro Deuchino", "technique": "bois", "lien": "https://www.digitale-sammlungen.de/en/view/bsb10171191?page=11"}, {"fx": 500.2, "fy": 114.0, "graveur": "Anonyme1572", "annee": 1588, "titre": "Le Metamorfosi di Ovidio", "ville": "Venise", "editeur": "Pietro Deuchino (heredi)", "technique": "bois", "lien": "https://www.digitale-sammlungen.de/de/details/bsb10198265"}, {"fx": 500.2, "fy": 114.0, "graveur": "Anonyme1572", "annee": 1588, "titre": "Le Metamorfosi di Ovidio", "ville": "Venise", "editeur": "s.n.", "technique": "bois", "lien": "https://www.digitale-sammlungen.de/en/view/bsb10198265?page=13"}, {"fx": 606.8, "fy": 114.0, "graveur": "Anonyme1572", "annee": 1624, "titre": "Le Metamorfosi di Ovidio", "ville": "Venise", "editeur": "s.n.", "technique": "bois", "lien": "https://www.digitale-sammlungen.de/en/view/bsb10242264?page=7"}, {"fx": 651.3, "fy": 138.0, "graveur": "Baur, Johann Wilhelm,", "annee": 1639, "titre": "album Baur", "ville": "Vienne ?", "editeur": "s.n.", "technique": "cuivre", "lien": "https://www.digitale-sammlungen.de/en/view/bsb10872073?page=,1"}, {"fx": 831.9, "fy": 138.0, "graveur": "Baur, Johann Wilhelm,", "annee": 1700, "titre": "album Baur", "ville": "Ville inconnue", "editeur": "Novis Impensis Jeremiae Wolffii Chalcographicae artis propolae Augustae Vindelicorum", "technique": "cuivre", "lien": "https://www.sudoc.fr/278988970"}, {"fx": 858.6, "fy": 138.0, "graveur": "Baur, Johann Wilhelm,", "annee": 1709, "titre": "Des vortrefflichen römischen Poetens Publii Ovidii Nasonis Metamorphoseon", "ville": "Augsbourg", "editeur": "s.n.", "technique": "cuivre", "lien": "https://www.digitale-sammlungen.de/en/view/bsb10872075?page=,1"}, {"fx": 885.2, "fy": 138.0, "graveur": "Baur, Johann Wilhelm,", "annee": 1718, "titre": "album Baur", "ville": "Nuremberg", "editeur": "s.n.", "technique": "cuivre", "lien": "https://biblio.bnu.fr/opac/resource/ovidii-metamorphosis-oder-verwandelungsbucher-hundert-und-funfzig-neue-kunstreiche-kuppferbildungen-/BUS03965235"}, {"fx": 911.9, "fy": 138.0, "graveur": "Baur, Johann Wilhelm,", "annee": 1727, "titre": "album Baur", "ville": "Nuremberg", "editeur": "Christoph Riegeln", "technique": "cuivre", "lien": null}, {"fx": 553.5, "fy": 162.0, "graveur": "Gaultier, Léonard", "annee": 1606, "titre": "Les Metamorphoses d´Ovide de nouveau traduites en françois", "ville": "Paris", "editeur": "Matthieu Guillemot", "technique": "cuivre", "lien": "http://www.ovidiuspictus.es/en/visualizacionejemplar.php?clave=47"}, {"fx": 565.4, "fy": 162.0, "graveur": "Gaultier, Léonard", "annee": 1610, "titre": "Les Metamorphoses d´Ovide de nouveau traduites en françois", "ville": "Paris", "editeur": "Matthieu Guillemot", "technique": "cuivre", "lien": "https://www.digitale-sammlungen.de/en/view/bsb11913284"}, {"fx": 577.2, "fy": 162.0, "graveur": "Gaultier, Léonard", "annee": 1614, "titre": "Les Metamorphoses d´Ovide de nouveau traduites en françois", "ville": "Paris", "editeur": "Veuve Guillemot", "technique": "cuivre", "lien": "https://gallica.bnf.fr/ark:/12148/bpt6k6277348n"}, {"fx": 583.2, "fy": 162.0, "graveur": "Gaultier, Léonard", "annee": 1616, "titre": "Les Metamorphoses d´Ovide de nouveau traduites en françois", "ville": "[Paris]", "editeur": "s.n.", "technique": "cuivre", "lien": "https://www.digitale-sammlungen.de/en/view/bsb10242228?page=60,"}, {"fx": 218.9, "fy": 186.0, "graveur": "Anonyme1493", "annee": 1493, "titre": "La Bible des Poètes", "ville": "Paris", "editeur": "Antoine Vérard", "technique": "bois", "lien": "https://gallica.bnf.fr/ark:/12148/bpt6k5340318j"}, {"fx": 227.8, "fy": 186.0, "graveur": "Anonyme1493", "annee": 1496, "titre": "Ovidius Metamorphoseos cum commento familiari", "ville": "Paris", "editeur": "Pierre Regnaul (André Bocard pour...)", "technique": "bois", "lien": "https://gallica.bnf.fr/ark:/12148/bpt6k8710229r/f14.item"}, {"fx": 236.7, "fy": 186.0, "graveur": "Anonyme1493", "annee": 1499, "titre": "Methamorphoze", "ville": "Paris", "editeur": "Antoine vérard", "technique": "bois", "lien": "https://gallica.bnf.fr/ark:/12148/btv1b2200019f"}, {"fx": 426.2, "fy": 210.0, "graveur": "Anonyme1563", "annee": 1563, "titre": "Le metamorfosi di Ovidio", "ville": "Venise", "editeur": "Francesco de' Franceschi", "technique": "bois", "lien": "https://www.digitale-sammlungen.de/en/view/bsb11217566?page=13"}, {"fx": 449.9, "fy": 210.0, "graveur": "Anonyme1563", "annee": 1571, "titre": "Le Metamorfosi di Ovidio", "ville": "Venise", "editeur": "Francesco de' Franceschi", "technique": "bois", "lien": "https://gallica.bnf.fr/ark:/12148/bpt6k1914143z"}, {"fx": 461.7, "fy": 210.0, "graveur": "Anonyme1563", "annee": 1575, "titre": "Le Metamorfosi di Ovidio", "ville": "Venise", "editeur": "Francesco de' Franceschi", "technique": "bois", "lien": "https://www.digitale-sammlungen.de/en/view/bsb11217570?page=11"}, {"fx": 811.2, "fy": 234.0, "graveur": "Anonyme1693", "annee": 1693, "titre": "Les Metamorphoses d'Ovide, avec des explications à la fin de chaque fable", "ville": "Amsterdam", "editeur": "Pieter Mortier", "technique": "cuivre", "lien": "https://www.digitale-sammlungen.de/en/view/bsb10912372?page=1"}, {"fx": 811.2, "fy": 234.0, "graveur": "Anonyme1693", "annee": 1693, "titre": "Les Metamorphoses d'Ovide, avec des explications à la fin de chaque fable", "ville": "Amsterdam", "editeur": "Pieter Mortier", "technique": "cuivre", "lien": "https://gallica.bnf.fr/ark:/12148/bpt6k8728031w"}, {"fx": 811.2, "fy": 234.0, "graveur": "Anonyme1693", "annee": 1693, "titre": "Les Metamorphoses d'Ovide, avec des explications à la fin de chaque fable", "ville": "Amsterdam", "editeur": "Pieter Mortier", "technique": "cuivre", "lien": "https://gallica.bnf.fr/ark:/12148/bpt6k8728069b"}, {"fx": 823.0, "fy": 258.0, "graveur": "monogrammiste H.T.", "annee": 1697, "titre": "Les Oeuvres d’Ovide par Monsieur de Martignac", "ville": "Lyon", "editeur": "Horace Molin", "technique": "cuivre", "lien": "http://www.ovidiuspictus.es/en/listadoejemplares.php?de=edicion&clave=30"}, {"fx": 823.0, "fy": 258.0, "graveur": "monogrammiste H.T.", "annee": 1697, "titre": "Les Oeuvres d’Ovide par Monsieur de Martignac", "ville": "Lyon", "editeur": "Horace Molin", "technique": "cuivre", "lien": "http://www.ovidiuspictus.es/en/listadoejemplares.php?de=edicion&clave=31"}, {"fx": 823.0, "fy": 258.0, "graveur": "monogrammiste H.T.", "annee": 1697, "titre": "Les Oeuvres d’Ovide par Monsieur de Martignac", "ville": "Lyon", "editeur": "Horace Molin", "technique": "cuivre", "lien": "https://babel.hathitrust.org/cgi/pt?id=ucm.5323841268&seq=7"}, {"fx": 230.7, "fy": 282.0, "graveur": "Anonyme1497", "annee": 1497, "titre": "Ovidio methamorphoseos vulgare", "ville": "Venise", "editeur": "Zoane Rosso", "technique": "bois", "lien": "https://gallica.bnf.fr/ark:/12148/btv1b22000181/f1.item"}, {"fx": 242.6, "fy": 282.0, "graveur": "Anonyme1497", "annee": 1501, "titre": "Ovidio Metamorphoseos vulgare", "ville": "Venise", "editeur": "C. de Pensa", "technique": "bois", "lien": "https://gallica.bnf.fr/ark:/12148/btv1b22000507"}, {"fx": 319.6, "fy": 306.0, "graveur": "Anonyme1527", "annee": 1527, "titre": "Publii Ovidii Nasonis Sulmonensis Metamorphoseos Librorum xv", "ville": "Lyon", "editeur": "Antoine Blanchard", "technique": "bois", "lien": "https://babel.hathitrust.org/cgi/pt?id=ucm.5327231213&seq=1"}, {"fx": 322.5, "fy": 306.0, "graveur": "Anonyme1527", "annee": 1528, "titre": "Textus Ovidii Metamorpho. Lib. XV", "ville": "Lyon", "editeur": "Antoine Du Ry", "technique": "bois", "lien": "http://www.ovidiuspictus.es/en/visualizacionejemplar.php?clave=150"}, {"fx": 334.4, "fy": 330.0, "graveur": "Anonyme1532", "annee": 1532, "titre": "Le Grand Olympe", "ville": "Lyon", "editeur": "Romain Morin et Denis de Harsy", "technique": "bois", "lien": "https://gallica.bnf.fr/ark:/12148/btv1b8600297j"}, {"fx": 364.0, "fy": 330.0, "graveur": "Anonyme1532", "annee": 1542, "titre": "P. Ovidii Nasonis Metamorphoseon, hoc est Transformationum, libri XV", "ville": "Lyon", "editeur": "Denis de Harsy", "technique": "bois", "lien": "http://www.ovidiuspictus.es/en/visualizacionejemplar.php?clave=149"}, {"fx": 372.9, "fy": 354.0, "graveur": "Wickram, Jörg (1505?-1560?)", "annee": 1545, "titre": "P. Ovidii Nasonis dess aller sinnreichsten Poeten Metamorphosis", "ville": "Mayence (Meinz)", "editeur": "Ivo Schöffer", "technique": "bois", "lien": "https://www.digitale-sammlungen.de/de/details/bsb10139926"}, {"fx": 390.7, "fy": 354.0, "graveur": "Wickram, Jörg (1505?-1560?)", "annee": 1551, "titre": "P. Ovidii Nasonis dess aller sinnreichsten Poeten Metamorphosis", "ville": "Mayence (Meinz)", "editeur": "Ivo Schöffer", "technique": "bois", "lien": "https://www.digitale-sammlungen.de/en/view/bsb11924456?page=,1"}, {"fx": 405.5, "fy": 378.0, "graveur": "Eskrich, Pierre", "annee": 1556, "titre": "Trois Premiers livres de la Métamorphose d'Ovide", "ville": "Lyon", "editeur": "Guillaume Rouillé", "technique": "bois", "lien": "https://gallica.bnf.fr/ark:/12148/btv1b22000559"}, {"fx": 405.5, "fy": 378.0, "graveur": "Eskrich, Pierre", "annee": 1556, "titre": "Trois Premiers livres de la Métamorphose d'Ovide", "ville": "Lyon", "editeur": "Macé Bonhomme", "technique": "bois", "lien": "https://gallica.bnf.fr/ark:/12148/bpt6k8709995p"}, {"fx": 473.6, "fy": 402.0, "graveur": "Anonyme1579", "annee": 1579, "titre": "Le Metamorfosi di Ovidio", "ville": "Venise", "editeur": "Marc'Antonio Zaltieri", "technique": "bois", "lien": "https://babel.hathitrust.org/cgi/pt?id=ucm.5324255972"}, {"fx": 586.1, "fy": 402.0, "graveur": "Anonyme1579", "annee": 1617, "titre": "Le Metamorfosi di Ovidio", "ville": "s.l.", "editeur": "Fr Čapek (appresso Giorgio Valentini)", "technique": "bois", "lien": "https://www.manuscriptorium.com/hub/catalog/default/detail/single/manuscriptorium%7CNKCR__-NKCR__6_K_000155__42M3NCD-cs?lang=cs"}, {"fx": 512.1, "fy": 426.0, "graveur": "Anonyme1592", "annee": 1592, "titre": "Le Metamorfosi di Ovidio", "ville": "Venise", "editeur": "Bernardo Giunta", "technique": "bois", "lien": "https://www.digitale-sammlungen.de/en/view/bsb11214794?page=,1"}, {"fx": 512.1, "fy": 426.0, "graveur": "Anonyme1592", "annee": 1592, "titre": "Le Metamorfosi di Ovidio", "ville": "Venise", "editeur": "s.n.", "technique": "bois", "lien": "https://www.digitale-sammlungen.de/en/view/bsb10198266"}, {"fx": 541.7, "fy": 450.0, "graveur": "Passe, Crispin de", "annee": 1602, "titre": "Metamorphoseon Ovidianarum per Crispianum Passaeum", "ville": "[Köln]", "editeur": "Crispin de Passe", "technique": "cuivre", "lien": "https://gallica.bnf.fr/ark:/12148/bpt6k15218623"}, {"fx": 556.5, "fy": 450.0, "graveur": "Passe, Crispin de", "annee": 1607, "titre": "P. Ovid. Nasonis XV Metamorphoseon librorum figurae", "ville": "Arnhemii", "editeur": "J. Jansonius", "technique": "cuivre", "lien": "https://gallica.bnf.fr/ark:/12148/bpt6k1522448r/f1.planchecontact"}, {"fx": 553.5, "fy": 474.0, "graveur": "Tempesta, Antonio", "annee": 1606, "titre": "Metamorphoseon Sive Transformationvm Ovidianarvm ab Antonio Tempesta Florentino incisi", "ville": "Anvers", "editeur": "Peter de Jode", "technique": "cuivre", "lien": "https://gallica.bnf.fr/ark:/12148/btv1b54000051z"}, {"fx": 565.4, "fy": 474.0, "graveur": "Tempesta, Antonio", "annee": 1610, "titre": "Metamorphoseon Sive Transformationvm Ovidianarvm ab Antonio Tempesta Florentino incisi", "ville": "Amsterdam", "editeur": "J. Jansonius", "technique": "cuivre", "lien": "https://www.digitale-sammlungen.de/en/view/bsb00008186"}, {"fx": 559.5, "fy": 498.0, "graveur": "Anonyme1608", "annee": 1608, "titre": "Olympe des histoires poétiques", "ville": "Rouen", "editeur": "Théodore Reinsart", "technique": "bois", "lien": "https://babel.hathitrust.org/cgi/pt?id=gri.ark:/13960/t9k40tp38&seq=7"}, {"fx": 657.2, "fy": 498.0, "graveur": "Anonyme1608", "annee": 1641, "titre": "Les Figures des Metamorphoses", "ville": "Rouen", "editeur": "David Ferrand", "technique": "bois", "lien": "https://gallica.bnf.fr/ark:/12148/bpt6k15034406"}, {"fx": 592.0, "fy": 522.0, "graveur": "Mathieu, Jean et autres", "annee": 1619, "titre": "Les Metamorphoses d´Ovide de nouveau traduites en françois", "ville": "Paris", "editeur": "Veuve L'Angelier", "technique": "cuivre", "lien": "https://gallica.bnf.fr/ark:/12148/btv1b22000826"}, {"fx": 645.3, "fy": 522.0, "graveur": "Mathieu, Jean et autres", "annee": 1637, "titre": "Les Metamorphoses d´Ovide de nouveau traduites en françois", "ville": "Paris", "editeur": "Pierre Billaine", "technique": "cuivre", "lien": "https://gallica.bnf.fr/ark:/12148/bpt6k87019014"}, {"fx": 598.0, "fy": 546.0, "graveur": "Moncornet, Baltazar", "annee": 1621, "titre": "Metamorphosis, sive transformationes Ovidianae iconibus repraesentatae", "ville": "Paris", "editeur": "Baltazar Moncornet", "technique": "cuivre", "lien": "https://gallica.bnf.fr/ark:/12148/bpt6k1520386g"}, {"fx": 713.5, "fy": 546.0, "graveur": "Moncornet, Baltazar", "annee": 1660, "titre": "Les Metamorphoses d'Ovide... par Du Ryer", "ville": "Paris", "editeur": "Antoine de Sommaville", "technique": "cuivre", "lien": "https://gallica.bnf.fr/ark:/12148/bpt6k87045023"}, {"fx": 686.8, "fy": 570.0, "graveur": "Blanchin, Jean", "annee": 1651, "titre": "Les Metamorphoses d´Ovide de nouveau traduites en françois", "ville": "Rouen", "editeur": "Jean Berthelin", "technique": "cuivre", "lien": "http://www.ovidiuspictus.es/en/listadoejemplares.php?de=edicion&clave=18"}, {"fx": 760.8, "fy": 570.0, "graveur": "Blanchin, Jean", "annee": 1676, "titre": "Les Metamorphoses d'Ovide... par Du Ryer", "ville": "Rouen", "editeur": "Jean Berthelin", "technique": "cuivre", "lien": "http://www.ovidiuspictus.es/en/visualizacionejemplar.php?clave=34"}, {"fx": 719.4, "fy": 594.0, "graveur": "Philippe, Pierre", "annee": 1662, "titre": "Opera omnia", "ville": "Leyde", "editeur": "Peter Leffen", "technique": "cuivre", "lien": "http://www.ovidiuspictus.es/en/listadoejemplares.php?de=edicion&clave=22"}, {"fx": 743.1, "fy": 594.0, "graveur": "Philippe, Pierre", "annee": 1670, "titre": "Opera omnia", "ville": "Leyde", "editeur": "Officina Hackiana", "technique": "cuivre", "lien": "http://www.ovidiuspictus.es/en/listadoejemplares.php?de=edicion&clave=4"}, {"fx": 740.1, "fy": 618.0, "graveur": "Weyen, Laurent", "annee": 1669, "titre": "Les Métamorphoses d´Ovide traduites par T. Corneille", "ville": "Paris", "editeur": "Claude Barbin", "technique": "cuivre", "lien": "http://www.ovidiuspictus.es/en/listadoejemplares.php?de=edicion&clave=78"}, {"fx": 760.8, "fy": 618.0, "graveur": "Weyen, Laurent", "annee": 1676, "titre": "Les Metamorphoses d'Ovide... par Du Ryer", "ville": "Paris", "editeur": "Etienne Loyson", "technique": "cuivre", "lien": "https://babel.hathitrust.org/cgi/pt?id=hvd.hn64uf&seq=20"}, {"fx": 781.6, "fy": 642.0, "graveur": "Mulder, Joseph", "annee": 1683, "titre": "P. Ovidii Nasonis opera omnia", "ville": "Amsterdam", "editeur": "Blaeu (« Typographia Blaviana »)", "technique": "cuivre", "lien": "http://www.ovidiuspictus.es/en/listadoejemplares.php?de=edicion&clave=35"}, {"fx": 837.8, "fy": 642.0, "graveur": "Mulder, Joseph", "annee": 1702, "titre": "P. Ovidii Nasonis Opera Omnia", "ville": "Amsterdam", "editeur": "Rembertus Goethals, Johannes II Janssonius van Waesberge et Hendrick Boom", "technique": "cuivre", "lien": "http://www.ovidiuspictus.es/en/listadoejemplares.php?de=edicion&clave=76"}];
+  const libellesTechnique = {"bois": "Bois", "cuivre": "Cuivre", "inconnue": "Technique inconnue"};
+
+  // Deux variantes du contenu, comme dans 02_nuage_editions_villes.ipynb : l'aperçu au
+  // survol n'inclut PAS le lien (il ne serait pas cliquable, l'infobulle de survol ignorant
+  // les clics tant qu'elle n'est pas épinglée) ; la version détaillée, affichée au clic une
+  // fois épinglée, inclut le lien "voir".
+  function contenuApercu(p) {
+    return '<b>' + p.graveur + '</b><br>' +
+      '<span>' + p.ville + ', ' + p.annee + ' · ' + libellesTechnique[p.technique] + '</span>' +
+      '<br><i>' + p.editeur + '</i>' +
+      (p.titre ? '<br>' + p.titre : '');
+  }
+  function contenuDetaille(p) {
+    const lien = p.lien ? '<br><a href="' + p.lien + '" target="_blank">→ voir</a>' : '';
+    return contenuApercu(p) + lien;
+  }
+
+  const infobulle = document.getElementById('infobulle');
+  const page = document.querySelector('.page');
+  let infobulleEpinglee = false;
+
+  function positionnerInfobulle(ev) {
+    const r = page.getBoundingClientRect();
+    infobulle.style.left = (ev.clientX - r.left + 14) + 'px';
+    infobulle.style.top = (ev.clientY - r.top + 14) + 'px';
+  }
+  function fermerInfobulle() {
+    infobulleEpinglee = false;
+    infobulle.classList.remove('epinglee');
+    infobulle.style.opacity = 0;
+    document.querySelectorAll('.point-frise.actif').forEach(c => c.classList.remove('actif'));
+  }
+
+  document.querySelectorAll('.point-frise').forEach(cercle => {
+    const p = points[+cercle.dataset.i];
+    cercle.addEventListener('mouseenter', () => {
+      if (infobulleEpinglee) return;
+      cercle.classList.add('actif');
+      infobulle.innerHTML = contenuApercu(p);
+      infobulle.style.opacity = 1;
+    });
+    cercle.addEventListener('mousemove', (ev) => {
+      if (infobulleEpinglee) return;
+      positionnerInfobulle(ev);
+    });
+    cercle.addEventListener('mouseleave', () => {
+      if (infobulleEpinglee) return;
+      cercle.classList.remove('actif');
+      infobulle.style.opacity = 0;
+    });
+    cercle.addEventListener('click', (ev) => {
+      ev.stopPropagation();
+      positionnerInfobulle(ev);
+      infobulle.innerHTML = contenuDetaille(p) + '<span class="fermer-infobulle" title="Fermer">×</span>';
+      infobulle.style.opacity = 1;
+      infobulle.classList.add('epinglee');
+      infobulleEpinglee = true;
+      document.querySelectorAll('.point-frise.actif').forEach(c => c.classList.remove('actif'));
+      cercle.classList.add('actif');
+      infobulle.querySelector('.fermer-infobulle').addEventListener('click', fermerInfobulle);
+    });
+  });
+
+  document.addEventListener('click', (ev) => {
+    if (infobulleEpinglee && !infobulle.contains(ev.target) && !ev.target.classList.contains('point-frise')) {
+      fermerInfobulle();
+    }
+  });
+
+  const boutonTableau = document.getElementById('boutonTableau');
+  boutonTableau.addEventListener('click', () => {
+    const tableau = document.getElementById('tableauDetaille');
+    const visible = tableau.classList.toggle('visible');
+    boutonTableau.textContent = visible ? 'Masquer le tableau détaillé' : 'Afficher le tableau détaillé';
+  });
+</script>
+</body></html>
