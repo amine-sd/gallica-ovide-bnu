@@ -15,15 +15,21 @@ Source commune aux cinq notebooks : `retours_celine/BNU_corpus.ods` (feuille `Sy
 le tableau de référence documenté par Céline Bohnert (titre, ville, année, technique,
 graveur, éditeur, liens).
 
+Dans `01` à `04`, une même édition parfois scindée en plusieurs lignes "tome" dans le
+tableau source (même ville/année/éditeur/titre abrégé/graveur, un titre complet différent
+par tome) est fusionnée en une seule édition avant tout traitement (`fusionner_tomes()`,
+dupliquée à l'identique dans chacun des quatre notebooks) : sans cette fusion, une même
+publication compterait deux ou trois fois.
+
 ## Notebooks
 
 | Fichier | Rôle |
 |---|---|
 | `01_carte_circulation.ipynb` | Carte Leaflet animée par un slider (1490-1750) — 19 villes, flèches de circulation (un graveur actif dans plusieurs villes) et flèches de copie (une édition copiant le travail d'un autre graveur). Frise et carte fusionnées : le slider fait avancer la carte dans le temps. |
-| `02_nuage_editions_villes.ipynb` | Carte + frise chronologique **côte à côte** (pas fusionnées), limité à Venise, Paris et Lyon — un nuage de points en spirale autour de chaque ville sur une vraie carte géographique historique, et la même liste d'éditions positionnée par année sur une frise SVG juste à côté. Sur la carte, les points regroupent les éditions par éditeur ou par graveur (bouton bascule) ; couleur propre à chaque groupe. |
-| `03_reemploi_plaques.ipynb` | Frise SVG en couloirs, sur l'ensemble du corpus (19 villes) — une ligne par jeu de plaques gravées réemployé (≥2 éditions), un point par édition l'utilisant. Distingue réimpression par le même éditeur (trait neutre), transmission à un autre éditeur (flèche rouge) et cas incertain (pointillé, éditeur non identifié). Pas de carte : question de filiation entre éditeurs dans le temps, pas de géographie. |
+| `02_nuage_editions_villes.ipynb` | Trois cartes géographiques historiques empilées, une par ville (Venise, Paris, Lyon) — un nuage de points en spirale autour de chaque ville, un point par éditeur (ou par graveur, bouton bascule global) ayant publié dans cette ville, taille ∝ nombre d'éditions, couleur propre à chaque groupe. Tableau détaillé dépliable sous chaque carte. |
+| `03_reemploi_plaques.ipynb` | Frise SVG en couloirs, sur l'ensemble du corpus (19 villes) — une ligne par jeu de plaques gravées, un point par édition l'utilisant. Distingue réimpression par le même éditeur (trait neutre), transmission à un autre éditeur (flèche rouge) et cas incertain (pointillé, éditeur non identifié), plus les flèches de copie entre jeux de plaques différents (même logique que `01`, adaptée aux couloirs). Une ligne réunit en général ≥2 éditions réemployées ; quelques lignes "solo" (une seule édition) sont ajoutées uniquement pour ancrer une flèche de copie. Les éditions à graveur composite (plusieurs personnes citées dans la colonne graveur) sont écartées : pas d'identité de plaques unique à tracer. Pas de carte : question de filiation entre éditeurs dans le temps, pas de géographie. |
 | `04_reseau_editions.ipynb` | Graphe en réseau (D3.js, disposition par simulation de forces) sur l'ensemble du corpus — un nœud par édition (couleur = ville), un lien par relation entre deux éditions : réemploi de plaques (mêmes 3 types que `03`) et copies (même logique que `01`), combinés dans un seul graphe. Demandé pour rassembler en une vue ce que `01`-`03` traitent séparément, quitte à ce que ce soit dense. Abscisse = année (axe gradué), ordonnée libre (juste pour étaler les nœuds) : hybride entre graphe en réseau et frise chronologique. |
-| `05_vignette_plaques.ipynb` | Cas d'étude ponctuel (pas tout le corpus) : le même jeu de plaques gravées, celui de Bernard Salomon (Lyon, 1557) repris à l'identique mais inversé par Virgil Solis (s.l., 1563), réemployé dans 10 éditions ultérieures — colonne `à utiliser pour visu 3` du tableau source. Vignette segmentée automatiquement (YOLO, `notebooks/gallica_utils.py`) au centre, entourée des pages qui la réemploient (affichées en entier, récupérées via l'API IIIF de Gallica et de la MDZ) ; cliquer une page recentre la vignette de sa famille de plaques. |
+| `05_vignette_plaques.ipynb` |  |
 
 ## Sorties
 
@@ -60,8 +66,8 @@ un navigateur.
   le template Python de la cellule de génération
 
 `03_reemploi_plaques.ipynb` n'utilise ni Leaflet ni MapLibre : pas de question géographique,
-juste une frise en SVG pur (générée en Python, comme les frises chronologiques des deux
-autres notebooks) et le même HTML/CSS/JS "vanilla" pour l'interaction.
+juste une frise en SVG pur (générée en Python, même principe que la frise fusionnée à la
+carte de `01_carte_circulation.ipynb`) et le même HTML/CSS/JS "vanilla" pour l'interaction.
 
 `04_reseau_editions.ipynb` introduit [D3.js](https://d3js.org/) v7 (`d3-force` pour la
 disposition du graphe par simulation physique, `d3-drag` et `d3-zoom` pour l'interaction) :
@@ -69,11 +75,4 @@ contrairement aux trois autres notebooks, où toutes les positions sont calculé
 Python, un graphe en réseau n'a pas de position "naturelle" — la disposition est calculée
 dans le navigateur, au chargement de la page.
 
-`05_vignette_plaques.ipynb` est le seul des cinq à manipuler de vraies images de page (les
-quatre autres sont purement vectoriels — SVG/Leaflet/D3). Récupération via l'API IIIF Image de
-Gallica et de la [MDZ](https://www.digitale-sammlungen.de/) (motifs d'URL déterminés
-spécifiquement pour ce notebook, aucun code existant du dépôt ne le faisait), segmentation par
-le modèle YOLO déjà utilisé dans `classification_bois_cuivre` et `classification_graveur`
-(`notebooks/gallica_utils.py`), puis ré-encodage en base64 pour rester dans la même convention
-de HTML autonome que les quatre autres sorties. HathiTrust et Manuscriptorium, qui bloquent les
-requêtes hors navigateur, restent en lien externe uniquement.
+`05_vignette_plaques.ipynb` 
