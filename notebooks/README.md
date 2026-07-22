@@ -32,6 +32,7 @@ notebooks/
 ├── documentation_similarite_salomon/    ← recherche par similarité d'image (corpus Salomon)
 ├── classification_bois_cuivre/          ← classifieur ResNet50 bois / cuivre — axe clôturé
 ├── classification_graveur/              ← classification par graveur — en cours
+├── themes_iconographiques/              ← mini RAG iconographique (recherche + génération) — exploratoire
 ├── visualisations/                      ← notebooks de visualisations spécifiques (cartes, frises...)
 ├── 04_exploration/                      ← explorations ponctuelles
 └── 05_annexes/                          ← tâches annexes
@@ -46,6 +47,10 @@ notebooks/
   l'historique des versions (v1 à v4.1.1).
 - **[`classification_graveur/`](classification_graveur/README.md)** —
   classification par graveur, axe en cours (constitution du dataset).
+- **[`themes_iconographiques/`](themes_iconographiques/README.md)** — mini RAG :
+  recherche vectorielle (SigLIP, hybride avec un index texte e5) sur les bases
+  Bibles + Ovide, génération de réponse par LLM local (Ollama, texte et vision),
+  interface de démo Gradio (`app_rag.py`). Axe exploratoire.
 - **[`visualisations/`](visualisations/README.md)** — notebooks produisant chacun une
   visualisation HTML autonome. Pour l'instant : cartes et frises chronologiques de la
   circulation des éditions (villes, graveurs, copies), à partir du corpus de référence
