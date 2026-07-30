@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Architecture du mini RAG iconographique</title>
+<style>
+  :root {
+    --ink: #1b241f;
+    --ink-soft: #48544c;
+    --paper: #eef1ec;
+    --paper-raised: #e2e7de;
+    --paper-card: #f6f8f4;
+    --rule: #cdd4c6;
+    --verdigris: #3f7566;
+    --verdigris-deep: #274d41;
+    --verdigris-tint: #dde9e3;
+    --gilt: #9c7a3f;
+    --gilt-tint: #ece2cc;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --ink: #e7ebe3;
+      --ink-soft: #aab3a8;
+      --paper: #101512;
+      --paper-raised: #182019;
+      --paper-card: #151b17;
+      --rule: #2a352d;
+      --verdigris: #74b09d;
+      --verdigris-deep: #a8d3c2;
+      --verdigris-tint: #1a2c26;
+      --gilt: #cdac6c;
+      --gilt-tint: #2a2416;
+    }
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: -apple-system, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    line-height: 1.55;
+  }
+
+  .page {
+    padding: 3.5rem 1.5rem 5rem;
+    min-height: 100vh;
+  }
+
+  .wrap {
+    max-width: 780px;
+    margin: 0 auto;
+  }
+
+  .mono {
+    font-family: ui-monospace, "SF Mono", Consolas, Menlo, monospace;
+    font-size: 0.85em;
+  }
+
+  /* ---------- header ---------- */
+  .eyebrow {
+    font-size: 0.72rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--verdigris-deep);
+    font-weight: 600;
+    margin: 0 0 0.9rem;
+  }
+
+  h1 {
+    font-family: Georgia, "Iowan Old Style", "Palatino Linotype", serif;
+    font-size: clamp(1.7rem, 3.4vw, 2.35rem);
+    line-height: 1.18;
+    letter-spacing: -0.01em;
+    margin: 0 0 0.9rem;
+    text-wrap: balance;
+    color: var(--ink);
+  }
+
+  .lede {
+    font-size: 1.05rem;
+    color: var(--ink-soft);
+    max-width: 62ch;
+    margin: 0;
+  }
+
+  .lede strong { color: var(--ink); font-weight: 600; }
+
+  header.masthead {
+    border-bottom: 1px solid var(--rule);
+    padding-bottom: 2rem;
+    margin-bottom: 2.6rem;
+  }
+
+  /* ---------- phase sections ---------- */
+  .phase {
+    margin-bottom: 3rem;
+  }
+
+  .phase-head {
+    display: flex;
+    align-items: baseline;
+    gap: 0.65rem;
+    margin-bottom: 1.4rem;
+  }
+
+  .phase-tag {
+    font-family: Georgia, "Iowan Old Style", serif;
+    font-style: italic;
+    font-size: 0.95rem;
+    color: var(--paper);
+    background: var(--verdigris-deep);
+    padding: 0.15rem 0.6rem 0.2rem;
+    border-radius: 2px;
+    flex-shrink: 0;
+  }
+
+  .phase h2 {
+    font-family: Georgia, "Iowan Old Style", serif;
+    font-size: 1.28rem;
+    font-weight: 600;
+    margin: 0;
+    color: var(--ink);
+  }
+
+  .phase-sub {
+    font-size: 0.9rem;
+    color: var(--ink-soft);
+    margin: -1rem 0 1.4rem;
+  }
+
+  /* ---------- diagram column ---------- */
+  .diagram {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .stage {
+    background: var(--paper-card);
+    border: 1px solid var(--rule);
+    border-radius: 6px;
+    padding: 1.05rem 1.25rem;
+    position: relative;
+  }
+
+  .stage-parallel {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.9rem;
+  }
+
+  .stage-parallel .stage { padding: 0.95rem 1.1rem; }
+
+  .stage-label {
+    font-size: 0.68rem;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--verdigris-deep);
+    font-weight: 700;
+    display: block;
+    margin-bottom: 0.35rem;
+  }
+
+  .stage-title {
+    font-weight: 600;
+    font-size: 0.98rem;
+    margin: 0 0 0.3rem;
+    color: var(--ink);
+  }
+
+  .stage p {
+    margin: 0;
+    font-size: 0.88rem;
+    color: var(--ink-soft);
+  }
+
+  .stage .mono {
+    color: var(--verdigris-deep);
+  }
+
+  .tag {
+    display: inline-block;
+    font-size: 0.72rem;
+    padding: 0.06rem 0.45rem;
+    border-radius: 3px;
+    font-weight: 600;
+    margin-right: 0.3rem;
+  }
+  .tag-bible { background: var(--gilt-tint); color: var(--gilt); }
+  .tag-ovide { background: var(--verdigris-tint); color: var(--verdigris-deep); }
+
+  /* connector */
+  .connector {
+    display: flex;
+    justify-content: center;
+    padding: 0.15rem 0;
+  }
+  .connector svg { display: block; }
+  .connector .arrow-line { stroke: var(--rule); stroke-width: 2; }
+  .connector .arrow-head { fill: var(--rule); }
+
+  /* ---------- rrf triple ---------- */
+  .rrf-box {
+    background: var(--verdigris-tint);
+    border: 1px solid var(--verdigris);
+    border-radius: 6px;
+    padding: 1.1rem 1.25rem 1.25rem;
+  }
+
+  .rrf-box .stage-title { color: var(--verdigris-deep); }
+
+  .rrf-rows {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin: 0.7rem 0 0.6rem;
+  }
+
+  .rrf-row {
+    display: grid;
+    grid-template-columns: 1.3fr 2fr auto;
+    gap: 0.7rem;
+    align-items: baseline;
+    font-size: 0.85rem;
+    padding: 0.45rem 0.65rem;
+    background: var(--paper-card);
+    border-radius: 4px;
+    border: 1px solid var(--rule);
+  }
+
+  .rrf-row .name { font-weight: 600; color: var(--ink); }
+  .rrf-row .desc { color: var(--ink-soft); }
+  .rrf-row .rank {
+    font-family: ui-monospace, "SF Mono", Consolas, monospace;
+    font-size: 0.75rem;
+    color: var(--verdigris-deep);
+    white-space: nowrap;
+  }
+
+  .rrf-note {
+    font-size: 0.82rem;
+    color: var(--ink-soft);
+    margin: 0.5rem 0 0;
+    padding-top: 0.55rem;
+    border-top: 1px dashed var(--rule);
+  }
+
+  /* ---------- llm split ---------- */
+  .llm-split {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.9rem;
+  }
+
+  .llm-card {
+    background: var(--paper-card);
+    border: 1px solid var(--rule);
+    border-radius: 6px;
+    padding: 1rem 1.15rem;
+  }
+
+  .llm-card.active { border-color: var(--verdigris); box-shadow: inset 0 0 0 1px var(--verdigris); }
+  .llm-card .stage-label { display: flex; align-items: center; gap: 0.4rem; }
+  .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--verdigris); display: inline-block; }
+  .dot-off { background: var(--rule); }
+
+  /* ---------- stats strip ---------- */
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1px;
+    background: var(--rule);
+    border: 1px solid var(--rule);
+    border-radius: 6px;
+    overflow: hidden;
+    margin: 2.6rem 0;
+  }
+
+  .stat {
+    background: var(--paper-card);
+    padding: 1.1rem 0.9rem;
+    text-align: center;
+  }
+
+  .stat b {
+    display: block;
+    font-family: Georgia, serif;
+    font-size: 1.5rem;
+    font-variant-numeric: tabular-nums;
+    color: var(--verdigris-deep);
+    line-height: 1.1;
+  }
+
+  .stat span {
+    display: block;
+    font-size: 0.72rem;
+    color: var(--ink-soft);
+    margin-top: 0.3rem;
+    line-height: 1.3;
+  }
+
+  /* ---------- limites ---------- */
+  .limites {
+    border-left: 3px solid var(--gilt);
+    background: var(--gilt-tint);
+    border-radius: 0 6px 6px 0;
+    padding: 1.1rem 1.3rem;
+    margin-top: 2.6rem;
+  }
+
+  .limites h3 {
+    margin: 0 0 0.6rem;
+    font-size: 0.95rem;
+    font-family: Georgia, serif;
+    font-weight: 600;
+    color: var(--ink);
+  }
+
+  .limites ul {
+    margin: 0;
+    padding-left: 1.1rem;
+    font-size: 0.87rem;
+    color: var(--ink-soft);
+  }
+  .limites li { margin-bottom: 0.4rem; }
+  .limites li:last-child { margin-bottom: 0; }
+  .limites strong { color: var(--ink); }
+
+  footer {
+    margin-top: 3rem;
+    padding-top: 1.3rem;
+    border-top: 1px solid var(--rule);
+    font-size: 0.78rem;
+    color: var(--ink-soft);
+    text-align: center;
+  }
+
+  @media (max-width: 620px) {
+    .stage-parallel, .llm-split { grid-template-columns: 1fr; }
+    .stats { grid-template-columns: 1fr 1fr; }
+    .rrf-row { grid-template-columns: 1fr; gap: 0.15rem; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="wrap">
+
+    <header class="masthead">
+      <p class="eyebrow">Stage BNU Strasbourg — axe « mini RAG iconographique »</p>
+      <h1>Comment le système retrouve puis décrit une illustration</h1>
+      <p class="lede">
+        Une requête en texte ou en image retrouve les gravures les plus proches dans un
+        corpus de <strong>2638 illustrations</strong> (Bibles illustrées + éditions des
+        <em>Métamorphoses</em> d'Ovide, 16<sup>e</sup>–17<sup>e</sup> s.), puis un modèle
+        de langage local rédige une réponse à partir de ce qui a été retrouvé — jamais de
+        mémoire.
+      </p>
+    </header>
+
+    <!-- PHASE A : offline -->
+    <section class="phase">
+      <div class="phase-head">
+        <span class="phase-tag">Phase 1</span>
+        <h2>Construction de la base — une seule fois</h2>
+      </div>
+      <p class="phase-sub">Faite en amont dans les notebooks ; le résultat est stocké, pas recalculé à chaque requête.</p>
+
+      <div class="diagram">
+        <div class="stage">
+          <span class="stage-label">Sources</span>
+          <p class="stage-title">2638 illustrations segmentées automatiquement</p>
+          <p>
+            <span class="tag tag-bible">447</span> Bibles illustrées (MDZ/BSB)
+            &nbsp;+&nbsp;
+            <span class="tag tag-ovide">2191</span> Ovide, 28 éditions —
+            rapprochées du catalogue de Céline Bohnert (<span class="mono">BNU_corpus.ods</span>)
+          </p>
+        </div>
+
+        <div class="connector">
+          <svg width="2" height="26" viewBox="0 0 2 26"><line class="arrow-line" x1="1" y1="0" x2="1" y2="18"/><polygon class="arrow-head" points="1,26 -4,16 6,16"/></svg>
+        </div>
+
+        <div class="stage-parallel">
+          <div class="stage">
+            <span class="stage-label">Encodage visuel</span>
+            <p class="stage-title mono">SigLIP</p>
+            <p>Image <em>et</em> texte dans le même espace 768D — une requête texte se compare donc directement aux images stockées.</p>
+          </div>
+          <div class="stage">
+            <span class="stage-label">Encodage métadonnées</span>
+            <p class="stage-title mono">multilingual-e5-small</p>
+            <p>Titre, ville, graveur, thème, description… en embeddings texte↔texte, dédiés aux requêtes factuelles.</p>
+          </div>
+        </div>
+
+        <div class="connector">
+          <svg width="2" height="26" viewBox="0 0 2 26"><line class="arrow-line" x1="1" y1="0" x2="1" y2="18"/><polygon class="arrow-head" points="1,26 -4,16 6,16"/></svg>
+        </div>
+
+        <div class="stage">
+          <span class="stage-label">Résultat stocké</span>
+          <p class="stage-title">Deux index vectoriels (fichiers <span class="mono">.pkl</span>)</p>
+          <p>
+            406 des 2191 illustrations Ovide portent en plus un thème précis planche par planche
+            (4 éditions cataloguées en détail) ; les autres n'ont que les métadonnées d'édition.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- PHASE B : online -->
+    <section class="phase">
+      <div class="phase-head">
+        <span class="phase-tag">Phase 2</span>
+        <h2>À chaque question posée dans le chat</h2>
+      </div>
+      <p class="phase-sub">Tout ce qui suit se rejoue en direct, en quelques secondes, dans <span class="mono">app_rag.py</span>.</p>
+
+      <div class="diagram">
+        <div class="stage">
+          <span class="stage-label">Entrée utilisateur</span>
+          <p class="stage-title">Une phrase ou une image envoyée dans l'interface</p>
+          <p>Ex. <em>« Cadmus combat un serpent »</em> — ou une gravure numérisée déposée directement.</p>
+        </div>
+
+        <div class="connector">
+          <svg width="2" height="26" viewBox="0 0 2 26"><line class="arrow-line" x1="1" y1="0" x2="1" y2="18"/><polygon class="arrow-head" points="1,26 -4,16 6,16"/></svg>
+        </div>
+
+        <div class="rrf-box">
+          <span class="stage-label" style="color:var(--verdigris-deep)">Recherche hybride</span>
+          <p class="stage-title">Trois classements fusionnés (Reciprocal Rank Fusion)</p>
+          <div class="rrf-rows">
+            <div class="rrf-row">
+              <span class="name">Similarité visuelle</span>
+              <span class="desc">SigLIP — proximité dans l'espace image/texte partagé</span>
+              <span class="rank mono">score ~0.1–0.2</span>
+            </div>
+            <div class="rrf-row">
+              <span class="name">Similarité métadonnées</span>
+              <span class="desc">e5 — proximité texte↔texte sur titre/thème/description</span>
+              <span class="rank mono">score ~0.75–0.85</span>
+            </div>
+            <div class="rrf-row">
+              <span class="name">Correspondance exacte</span>
+              <span class="desc">un mot de la requête matche mot-pour-mot ville/graveur/technique</span>
+              <span class="rank mono">rang 1 ou dernier</span>
+            </div>
+          </div>
+          <p class="rrf-note">
+            La fusion ne compare que des <strong>rangs</strong>, jamais les scores bruts — les trois
+            classements ont des échelles incompatibles. Le filtre exact corrige les confusions
+            sémantiques (ex. <em>« Lyon »</em> qui faisait remonter une gravure d'<em>« Hippomène en Lion »</em>).
+          </p>
+        </div>
+
+        <div class="connector">
+          <svg width="2" height="26" viewBox="0 0 2 26"><line class="arrow-line" x1="1" y1="0" x2="1" y2="18"/><polygon class="arrow-head" points="1,26 -4,16 6,16"/></svg>
+        </div>
+
+        <div class="stage">
+          <span class="stage-label">Mise en contexte</span>
+          <p class="stage-title">Les 4 meilleures illustrations → texte + images</p>
+          <p>Score, thème, ville, graveur, technique de chacune sont mis en forme et envoyés au modèle de langage — jamais la base entière.</p>
+        </div>
+
+        <div class="connector">
+          <svg width="2" height="26" viewBox="0 0 2 26"><line class="arrow-line" x1="1" y1="0" x2="1" y2="18"/><polygon class="arrow-head" points="1,26 -4,16 6,16"/></svg>
+        </div>
+
+        <div class="stage">
+          <span class="stage-label">Génération — LLM local (Ollama)</span>
+          <p class="stage-title">Aucune donnée n'est envoyée à un service externe</p>
+          <div class="llm-split">
+            <div class="llm-card">
+              <span class="stage-label"><span class="dot dot-off"></span>Texte seul</span>
+              <p class="stage-title mono">llama3.2</p>
+              <p>Ne voit que les métadonnées — accessible via le menu « Options » de l'interface, pour comparer avec la vision.</p>
+            </div>
+            <div class="llm-card active">
+              <span class="stage-label"><span class="dot"></span>Texte + vision</span>
+              <p class="stage-title mono">qwen2.5vl</p>
+              <p>Voit réellement les 4 images et rédige la réponse — mode par défaut du chat.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="connector">
+          <svg width="2" height="26" viewBox="0 0 2 26"><line class="arrow-line" x1="1" y1="0" x2="1" y2="18"/><polygon class="arrow-head" points="1,26 -4,16 6,16"/></svg>
+        </div>
+
+        <div class="stage">
+          <span class="stage-label">Sortie</span>
+          <p class="stage-title">Vignettes + réponse rédigée, dans le chat Gradio</p>
+          <p>Interface locale (<span class="mono">localhost:7860</span>), façon ChatGPT.</p>
+        </div>
+      </div>
+    </section>
+
+    <div class="stats">
+      <div class="stat"><b>2638</b><span>illustrations indexées</span></div>
+      <div class="stat"><b>28</b><span>éditions d'Ovide couvertes</span></div>
+      <div class="stat"><b>406</b><span>planches à thème précis (4 éditions)</span></div>
+      <div class="stat"><b>0</b><span>appel à une API externe</span></div>
+    </div>
+
+    <div class="limites">
+      <h3>À dire honnêtement si la question vient</h3>
+      <ul>
+        <li><strong>Couverture partielle</strong> — seules 4 éditions sur 28 ont un thème précis planche par planche (406/2191) ; les autres n'ont que les métadonnées d'édition.</li>
+        <li><strong>Contamination inter-images</strong> — quand plusieurs illustrations de sujets différents sont renvoyées ensemble, le modèle vision attribue parfois par erreur le personnage de la requête à une image qui n'a aucun rapport. Testé sur 5 formulations de prompt, réduit mais pas éliminé.</li>
+        <li><strong>Réponses non strictement reproductibles</strong> — la génération LLM comporte une part d'aléatoire ; deux runs sur la même question peuvent différer légèrement.</li>
+      </ul>
+    </div>
+
+    <footer>
+      Schéma d'architecture — mini RAG iconographique, notebooks/mini_rag_iconographique/
+    </footer>
+
+  </div>
+</div>
+</body>
+</html>

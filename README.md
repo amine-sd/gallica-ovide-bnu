@@ -28,6 +28,7 @@ anciennes des *Métamorphoses* d'Ovide, à l'aide d'outils de vision par ordinat
 ```
 working_dir/
 ├── notebooks/        ← tout le code (voir notebooks/README.md pour le détail du pipeline)
+├── docs/               ← documentation detaillee de chaque axe (1 fichier par dossier de notebooks/)
 ├── data/              ← données (brutes, segmentées, datasets) — volumineux, exclu de Git
 │   ├── bibles_mdz/     ← corpus de bibles MDZ/BSB
 │   └── editions_ovide/ ← sources, illustrations segmentées et datasets (bois/cuivre, graveur)

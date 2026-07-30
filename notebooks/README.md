@@ -2,9 +2,9 @@
 **Stage Bnu Strasbourg — depuis avril 2026**
 **Corpus** : Illustrations des *Métamorphoses* d'Ovide, 16e–17e siècles
 
-Chaque sous-dossier a son propre `README.md` avec le détail de son pipeline, ses
-notebooks et (le cas échéant) ses résultats. Ce fichier ne garde que les infos
-générales communes à tous les axes.
+La documentation détaillée de chaque axe (pipeline, notebooks, résultats) vit dans
+[`docs/`](../docs/), un fichier par axe, nommé d'après son dossier. Ce fichier-ci
+ne garde que les infos générales communes à tous les axes.
 
 ---
 
@@ -32,34 +32,34 @@ notebooks/
 ├── documentation_similarite_salomon/    ← recherche par similarité d'image (corpus Salomon)
 ├── classification_bois_cuivre/          ← classifieur ResNet50 bois / cuivre — axe clôturé
 ├── classification_graveur/              ← classification par graveur — en cours
-├── themes_iconographiques/              ← mini RAG iconographique (recherche + génération) — exploratoire
+├── mini_rag_iconographique/             ← mini RAG iconographique (recherche + génération) — exploratoire
 ├── visualisations/                      ← notebooks de visualisations spécifiques (cartes, frises...)
 ├── 04_exploration/                      ← explorations ponctuelles
 └── 05_annexes/                          ← tâches annexes
 ```
 
-- **[`documentation_similarite_salomon/`](documentation_similarite_salomon/README.md)** — documentation de l'API BnF
+- **[`documentation_similarite_salomon/`](../docs/documentation_similarite_salomon.md)** — documentation de l'API BnF
   (CLIP, filtres, endpoints), collecte et analyse des résultats de similarité d'image sur
   le corpus de Bernard Salomon (1557).
-- **[`classification_bois_cuivre/`](classification_bois_cuivre/README.md)** —
+- **[`classification_bois_cuivre/`](../docs/classification_bois_cuivre.md)** —
   classifieur ResNet50 bois/cuivre. Axe **clôturé** : v4.0.0 et v4.1.1 retenues comme
-  versions finales, voir le README du dossier pour la fiche technique complète et
+  versions finales, voir sa fiche dans `docs/` pour le détail technique complet et
   l'historique des versions (v1 à v4.1.1).
-- **[`classification_graveur/`](classification_graveur/README.md)** —
+- **[`classification_graveur/`](../docs/classification_graveur.md)** —
   classification par graveur, axe en cours (constitution du dataset).
-- **[`themes_iconographiques/`](themes_iconographiques/README.md)** — mini RAG :
+- **[`mini_rag_iconographique/`](../docs/mini_rag_iconographique.md)** — mini RAG :
   recherche vectorielle (SigLIP, hybride avec un index texte e5) sur les bases
   Bibles + Ovide, génération de réponse par LLM local (Ollama, texte et vision),
   interface de démo Gradio (`app_rag.py`). Axe exploratoire.
-- **[`visualisations/`](visualisations/README.md)** — notebooks produisant chacun une
+- **[`visualisations/`](../docs/visualisations.md)** — notebooks produisant chacun une
   visualisation HTML autonome. Pour l'instant : cartes et frises chronologiques de la
   circulation des éditions (villes, graveurs, copies), à partir du corpus de référence
   de Céline Bohnert (`retours_celine/BNU_corpus.ods`).
-- **[`04_exploration/`](04_exploration/README.md)** — explorations ponctuelles :
+- **[`04_exploration/`](../docs/04_exploration.md)** — explorations ponctuelles :
   comparaison CLIP/DINOv2, tests LLM sur l'iconographie, clustering de bibles
   illustrées, et la validation BnF exploratoire de l'axe bois/cuivre (déplacée ici,
-  voir raisons dans son README).
-- **[`05_annexes/`](05_annexes/README.md)** — tâches annexes (récupération de bibles
+  voir raisons dans sa fiche).
+- **[`05_annexes/`](../docs/05_annexes.md)** — tâches annexes (récupération de bibles
   illustrées BSB/MDZ).
 
 ---
