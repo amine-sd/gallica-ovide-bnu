@@ -5,10 +5,8 @@ data/
 modeles/*/*.pth
 
 # ── Résultats volumineux ──────────────────────────────────────
-resultats/similarite/Tableau_html/
 resultats/csv/
 resultats/Validation_cuivre_bois/*/galeries*/
-resultats/galerie_bibles/*
 
 # ── Retours de validation (Céline) ────────────────────────────
 retours_celine/
@@ -44,3 +42,6 @@ build/
 .DS_Store
 Thumbs.db
 desktop.ini
+
+# ── Config locale Claude Code ─────────────────────────────────
+.claude/
