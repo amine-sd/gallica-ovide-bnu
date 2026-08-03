@@ -322,6 +322,7 @@ demo = gr.ChatInterface(
 )
 
 if __name__ == "__main__":
-    # server_name="0.0.0.0" : accessible depuis d'autres machines du meme reseau
-    # (utile si le lien public gradio.live est bloque par un pare-feu reseau).
-    demo.queue().launch(share=True, server_name="0.0.0.0")
+    # server_name="0.0.0.0" : accessible depuis d'autres machines du meme reseau.
+    # Pas de share=True : le lien public gradio.live est bloque par le pare-feu
+    # reseau ici (timeout a chaque lancement, pour rien) - usage local uniquement.
+    demo.queue().launch(server_name="0.0.0.0")

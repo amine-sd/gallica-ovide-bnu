@@ -32,10 +32,10 @@ notebooks/
 ├── documentation_similarite_salomon/    ← recherche par similarité d'image (corpus Salomon)
 ├── classification_bois_cuivre/          ← classifieur ResNet50 bois / cuivre — axe clôturé
 ├── classification_graveur/              ← classification par graveur — en cours
+├── corpus_bibles/                       ← récupération, tri et classification par thème des Bibles (BSB/MDZ)
 ├── mini_rag_iconographique/             ← mini RAG iconographique (recherche + génération) — exploratoire
-├── visualisations/                      ← notebooks de visualisations spécifiques (cartes, frises...)
-├── 04_exploration/                      ← explorations ponctuelles
-└── 05_annexes/                          ← tâches annexes
+├── comparaison_ovide_bibles/             ← proximité par embeddings (UMAP) — à part du RAG
+└── visualisations/                      ← notebooks de visualisations spécifiques (cartes, frises...)
 ```
 
 - **[`documentation_similarite_salomon/`](../docs/documentation_similarite_salomon.md)** — documentation de l'API BnF
@@ -47,20 +47,20 @@ notebooks/
   l'historique des versions (v1 à v4.1.1).
 - **[`classification_graveur/`](../docs/classification_graveur.md)** —
   classification par graveur, axe en cours (constitution du dataset).
+- **[`corpus_bibles/`](../docs/corpus_bibles.md)** — récupération de Bibles illustrées
+  depuis BSB/MDZ, tri visuel, puis classification par thème iconographique (atelier
+  web) : le corpus Bibles utilisé par `mini_rag_iconographique/`.
 - **[`mini_rag_iconographique/`](../docs/mini_rag_iconographique.md)** — mini RAG :
   recherche vectorielle (SigLIP, hybride avec un index texte e5) sur les bases
   Bibles + Ovide, génération de réponse par LLM local (Ollama, texte et vision),
   interface de démo Gradio (`app_rag.py`). Axe exploratoire.
+- **[`comparaison_ovide_bibles/`](../docs/comparaison_ovide_bibles.md)** — proximité
+  Ovide/Bibles par embeddings SigLIP (projection UMAP, correspondances par thème) — à
+  part du RAG, ne fait pas partie de son pipeline.
 - **[`visualisations/`](../docs/visualisations.md)** — notebooks produisant chacun une
   visualisation HTML autonome. Pour l'instant : cartes et frises chronologiques de la
   circulation des éditions (villes, graveurs, copies), à partir du corpus de référence
   de Céline Bohnert (`retours_celine/BNU_corpus.ods`).
-- **[`04_exploration/`](../docs/04_exploration.md)** — explorations ponctuelles :
-  comparaison CLIP/DINOv2, tests LLM sur l'iconographie, clustering de bibles
-  illustrées, et la validation BnF exploratoire de l'axe bois/cuivre (déplacée ici,
-  voir raisons dans sa fiche).
-- **[`05_annexes/`](../docs/05_annexes.md)** — tâches annexes (récupération de bibles
-  illustrées BSB/MDZ).
 
 ---
 

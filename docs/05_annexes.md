@@ -1,13 +1,8 @@
-# Annexes
+# Annexes (dossier dissous)
 
-Tâches annexes, hors des axes principaux du projet.
-
-## Notebooks
-
-| Fichier | Rôle |
-|---|---|
-| `recuperation_bsb.ipynb` | Récupération de bibles illustrées depuis BSB/MDZ (Bayerische Staatsbibliothek / Münchener DigitalisierungsZentrum) → `data/bibles_mdz/` |
-
-Les illustrations récupérées ici alimentent les explorations de clustering dans
-`../04_exploration/` (`clustering_ovide_bibles.ipynb`, `test_clusters_bibles.ipynb`,
-etc.).
+Le dossier `notebooks/05_annexes/` n'existe plus — réorganisation du dépôt
+("Nettoyage dir"). Son seul fichier, `recuperation_bsb.ipynb` (récupération de
+bibles illustrées depuis BSB/MDZ — Bayerische Staatsbibliothek / Münchener
+DigitalisierungsZentrum → `data/bibles_mdz/`), vit maintenant dans
+[`corpus_bibles/`](corpus_bibles.md), aux côtés des notebooks de tri et de
+clustering qui exploitent son résultat.

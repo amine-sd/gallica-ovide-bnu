@@ -18,10 +18,10 @@ d'Ovide.
 | `04_validation_experte.ipynb` | Génère les tableaux HTML de validation soumis à Céline Bohnert |
 | `05_evaluation_versions.ipynb` | Compare toutes les versions face aux annotations de Céline — **évaluation de référence** |
 
-`validation_bnf_etiquete.ipynb` (validation externe sur corpus BnF étiqueté) a été
-déplacé dans `../04_exploration/` — méthode gardée à titre exploratoire mais écartée
-comme référence (métadonnée technique BnF peu fiable, corpus instable d'un run à
-l'autre). Voir son README pour le détail.
+`validation_bnf_etiquete.ipynb` (validation externe sur corpus BnF étiqueté) reste dans
+ce dossier mais hors du pipeline principal — méthode gardée à titre exploratoire mais
+écartée comme référence (métadonnée technique BnF peu fiable, corpus instable d'un run
+à l'autre).
 
 ### Ordre d'exécution
 
@@ -174,7 +174,7 @@ sources visuelles indépendantes** (`bois_solis_feyerabend_francfort1581` est un
 copie en miroir de `bois_salomon_rouille_lyon1557` — pratique de copie de gravure
 documentée) sur les 5 éditions disponibles. Toute évaluation sur du bois totalement
 hors du corpus Ovide doit être interprétée avec cette réserve. Le corpus BnF
-étiqueté (`../04_exploration/validation_bnf_etiquete.ipynb`) donnait des résultats
+étiqueté (`validation_bnf_etiquete.ipynb`, ce dossier) donnait des résultats
 bien plus bas et instables d'un run à l'autre (~60-70 %, l'échantillon change à
 chaque téléchargement) — et son champ `properties_technical_process` s'est aussi
 révélé peu fiable à l'inspection visuelle (images étiquetées "bois" ne ressemblant
@@ -195,7 +195,7 @@ data/
     ├── sources/                     ← pages brutes téléchargées, par édition
     ├── segmentees/                  ← illustrations extraites par YOLO, par édition
     ├── datasets/                    ← train/val/test pour le classifieur (reconstruit à chaque run de 01_dataset.ipynb)
-    └── test_bnf_etiquete/           ← corpus BnF étiqueté (voir ../04_exploration/validation_bnf_etiquete.ipynb)
+    └── test_bnf_etiquete/           ← corpus BnF étiqueté (voir validation_bnf_etiquete.ipynb, ce dossier)
 
 modeles/
 └── bois_cuivre/

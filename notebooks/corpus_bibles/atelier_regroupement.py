@@ -12,8 +12,16 @@ Au démarrage :
 Fonctions :
   - "Regrouper le reste" : K-Means (n classes) sur les images NON validées
   - Valider une classe : la fige pour la session (le re-clustering ne la touche plus)
-  - déplacer une image (icône + menu), supprimer image ou classe
+  - déplacer une image (icône + menu), supprimer une image
+  - fusionner une classe entière dans une autre (menu, comme pour déplacer une image),
+    ou la supprimer définitivement — deux boutons distincts, pas de confusion possible
   - voir en grand + navigation (flèches / clavier), numéro de position sur chaque vignette
+  - supprimer une image depuis la vue agrandie (icône ou touche Suppr), sans repasser
+    par les vignettes — reste en grand sur l'image suivante
+  - sélection multiple (case sur chaque vignette) + suppression en lot (bouton ou
+    touche Suppr) — n'importe où dans la grille, toutes classes confondues
+  - menu "Classement" : change l'ordre d'affichage des classes (numéro, nom, taille,
+    validées/non validées d'abord) — affichage seulement, ne change rien aux données
   - "Enregistrer" : réécrit classes_celine/ avec l'organisation courante
         => c'est À LA FOIS la sauvegarde et le point de reprise de la prochaine session
 
@@ -210,6 +218,11 @@ PAGE = r"""<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8">
   .cell .move { bottom: 2px; left: 2px; background: #0f6e56; }
   .cell .x    { top: 2px; right: 2px; background: #c0392b; }
   .cell:hover .oeil, .cell:hover .move, .cell:hover .x { opacity: 1; }
+  .cell .sel { position: absolute; top: 2px; left: 50%; transform: translateX(-50%);
+               width: 17px; height: 17px; cursor: pointer; z-index: 5; }
+  .cell.selectionnee { outline: 3px solid #185fa5; outline-offset: -3px; }
+  .selection-bar { display: none; align-items: center; gap: 8px; }
+  select#tri { font-size: 14px; padding: 6px 8px; border: 1px solid #bbb; border-radius: 6px; }
   .hint { font-size: 13px; color: #777; margin: 4px 0 12px; }
   #msg { font-size: 14px; color: #0f6e56; }
   .loupe-fond { position: fixed; inset: 0; background: rgba(0,0,0,0.8); display: none;
@@ -220,6 +233,8 @@ PAGE = r"""<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8">
   #fg { left: 20px; } #fd { right: 20px; }
   .loupe-fermer { position: absolute; top: 16px; right: 20px; width: 40px; height: 40px; border-radius: 50%;
                   background: rgba(255,255,255,0.9); border: none; font-size: 20px; cursor: pointer; }
+  .loupe-suppr { position: absolute; top: 16px; left: 20px; width: 40px; height: 40px; border-radius: 50%;
+                 background: rgba(192,57,43,0.9); color: #fff; border: none; font-size: 18px; cursor: pointer; }
   .loupe-cpt { position: absolute; bottom: 18px; left: 50%; transform: translateX(-50%); color: #fff;
                font-size: 14px; background: rgba(0,0,0,0.5); padding: 4px 12px; border-radius: 12px; }
   .menu-fond { position: fixed; inset: 0; background: rgba(0,0,0,0.4); display: none;
@@ -233,15 +248,37 @@ PAGE = r"""<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8">
   <label>Classes (pour le reste) : <input type="number" id="n" value="12" min="1" max="60"></label>
   <button onclick="regrouper()">Regrouper le reste</button>
   <span style="border-left:1px solid #ccc;height:24px"></span>
+  <label>Classement : <select id="tri" onchange="render()">
+    <option value="numero">Ordre (numero)</option>
+    <option value="nom">Nom (A→Z)</option>
+    <option value="taille_desc">Nombre d'images (plus → moins)</option>
+    <option value="taille_asc">Nombre d'images (moins → plus)</option>
+    <option value="non_validees">Non validees d'abord</option>
+    <option value="validees">Validees d'abord</option>
+  </select></label>
+  <span style="border-left:1px solid #ccc;height:24px"></span>
   <button class="primary" onclick="enregistrer()">Enregistrer</button>
   <span id="msg"></span>
+  <span class="selection-bar" id="selection-bar">
+    <span id="sel-cpt"></span>
+    <button class="danger" onclick="supprimerSelection()">Supprimer la selection</button>
+    <button onclick="viderSelection()">Annuler la selection</button>
+  </span>
 </div>
 <p class="hint">L'atelier reprend ce qui est dans classes_celine/. Survole une image : oeil = voir,
-fleches = deplacer, croix = supprimer. Valider fige une classe (le regroupement ne la touche plus).
+fleches = deplacer, croix = supprimer. En grand (oeil), la poubelle (ou la touche Suppr)
+supprime l'image sans refermer la vue agrandie — elle passe directement a la suivante.
+La case au-dessus de chaque vignette selectionne l'image pour une suppression en lot
+(bouton "Supprimer la selection" dans la barre, ou touche Suppr). Le menu Classement
+change juste l'ordre d'affichage des classes, il ne change rien aux donnees.
+Sur une classe : "Fusionner..." deplace toutes ses images dans une autre classe (menu au
+choix) ; "Supprimer la classe" supprime definitivement ses images — deux boutons distincts.
+Valider fige une classe (le regroupement ne la touche plus).
 Enregistrer reecrit classes_celine/ : c'est ta sauvegarde et le point de reprise.</p>
 <div id="classes"></div>
 
 <div class="loupe-fond" id="loupe">
+  <button class="loupe-suppr" onclick="supprimerDepuisLoupe()" title="Supprimer cette image">&#128465;</button>
   <button class="loupe-fermer" onclick="fermerLoupe()">&times;</button>
   <button class="loupe-fleche" id="fg" onclick="naviguer(-1)">&#8249;</button>
   <img src="">
@@ -257,6 +294,7 @@ let images = [];          // {id, classe (int|null), valide}
 let nomsClasses = {};
 let classesValidees = new Set();
 let prochaineClasse = 0;
+let selection = new Set();   // ids selectionnes pour suppression en lot
 
 async function init() {
   const r = await fetch("/init");
@@ -306,11 +344,26 @@ function classesActuelles() {
   return m;
 }
 
+function ordreClasses(m) {
+  const cls = Object.keys(m);
+  const tri = document.getElementById("tri") ? document.getElementById("tri").value : "numero";
+  const taille = cl => m[cl].length;
+  const nom = cl => (nomsClasses[cl] || ("classe " + cl)).toLowerCase();
+  const estValidee = cl => classesValidees.has(parseInt(cl)) ? 1 : 0;
+  if (tri === "nom") cls.sort((a, b) => nom(a).localeCompare(nom(b)));
+  else if (tri === "taille_desc") cls.sort((a, b) => taille(b) - taille(a));
+  else if (tri === "taille_asc") cls.sort((a, b) => taille(a) - taille(b));
+  else if (tri === "non_validees") cls.sort((a, b) => estValidee(a) - estValidee(b));
+  else if (tri === "validees") cls.sort((a, b) => estValidee(b) - estValidee(a));
+  else cls.sort((a, b) => a - b);   // "numero" (defaut) : ordre d'apparition des classes
+  return cls;
+}
+
 function render() {
   const cont = document.getElementById("classes");
   cont.innerHTML = "";
   const m = classesActuelles();
-  Object.keys(m).sort((a,b)=>a-b).forEach(cl => {
+  ordreClasses(m).forEach(cl => {
     const valide = classesValidees.has(parseInt(cl));
     const div = document.createElement("div");
     div.className = "classe" + (valide ? " valide" : "");
@@ -320,13 +373,16 @@ function render() {
       + '<span class="n">' + m[cl].length + ' images</span>'
       + (valide ? '<span class="badge-v">validee</span><button onclick="devalider(' + cl + ')">Devalider</button>'
                 : '<button class="primary" onclick="valider(' + cl + ')">Valider</button>'
+                  + '<button onclick="fusionnerClasse(' + cl + ')">Fusionner...</button>'
                   + '<button class="danger" onclick="supprimerClasse(' + cl + ')">Supprimer la classe</button>')
       + '</div><div class="grid"></div>';
     const grid = div.querySelector(".grid");
     m[cl].forEach((im, i) => {
       const c = document.createElement("div");
-      c.className = "cell";
+      c.className = "cell" + (selection.has(im.id) ? " selectionnee" : "");
       c.innerHTML = '<img loading="lazy" src="/img/' + encodeURIComponent(im.id) + '">'
+        + '<input type="checkbox" class="sel" title="Selectionner" onclick="toggleSelection(\'' + im.id + '\')"'
+          + (selection.has(im.id) ? ' checked' : '') + '>'
         + '<button class="oeil" onclick="voir(\'' + im.id + '\')">&#128065;</button>'
         + (valide ? '' : '<button class="move" onclick="ouvrirMenu(\'' + im.id + '\')">&#8596;</button>'
                        + '<button class="x" onclick="supprimerImage(\'' + im.id + '\')">&times;</button>')
@@ -335,7 +391,33 @@ function render() {
     });
     cont.appendChild(div);
   });
+  majBarreSelection();
 }
+
+function toggleSelection(id) {
+  if (selection.has(id)) selection.delete(id); else selection.add(id);
+  render();
+}
+
+function majBarreSelection() {
+  const bar = document.getElementById("selection-bar");
+  if (selection.size) {
+    bar.style.display = "inline-flex";
+    document.getElementById("sel-cpt").textContent = selection.size + " selectionnee(s)";
+  } else {
+    bar.style.display = "none";
+  }
+}
+
+function supprimerSelection() {
+  if (!selection.size) return;
+  if (!confirm("Supprimer " + selection.size + " illustration(s) selectionnee(s) ?")) return;
+  images = images.filter(im => !selection.has(im.id));
+  selection.clear();
+  render();
+}
+
+function viderSelection() { selection.clear(); render(); }
 
 async function valider(cl) {
   classesValidees.add(parseInt(cl));
@@ -345,14 +427,34 @@ async function valider(cl) {
 }
 function devalider(cl) { classesValidees.delete(parseInt(cl)); render(); }
 
-function supprimerImage(id) { images = images.filter(im => im.id !== id); render(); }
+function supprimerImage(id) { images = images.filter(im => im.id !== id); selection.delete(id); render(); }
 
 function supprimerClasse(cl) {
-  const restantes = [...new Set(images.map(im=>im.classe))].filter(c => c != cl && c !== null && !classesValidees.has(c));
-  if (!restantes.length) { alert("Aucune autre classe non validee pour recevoir les images."); return; }
-  const cible = restantes.sort((a,b)=>a-b)[0];
-  if (!confirm("Deplacer les images vers " + (nomsClasses[cible]||("classe "+cible)) + " ?")) return;
-  images.forEach(im => { if (im.classe == cl) im.classe = cible; });
+  const n = images.filter(im => im.classe == cl).length;
+  if (!confirm("Supprimer definitivement cette classe et ses " + n + " illustrations ? (utilise \"Fusionner...\" pour les deplacer au lieu de les supprimer)")) return;
+  images = images.filter(im => im.classe != cl);
+  render();
+}
+
+function fusionnerClasse(cl) {
+  const m = classesActuelles();
+  const cibles = Object.keys(m).filter(c => c != cl);
+  if (!cibles.length) { alert("Aucune autre classe disponible pour fusionner."); return; }
+  let html = "<h3>Fusionner cette classe dans...</h3>";
+  cibles.sort((a, b) => a - b).forEach(c => {
+    const tag = classesValidees.has(parseInt(c)) ? " (validee)" : "";
+    html += '<button onclick="fusionnerVers(' + cl + ', ' + c + ')">'
+          + (nomsClasses[c] || ("classe " + c)) + tag + ' <span style="color:#888">(' + m[c].length + ')</span></button>';
+  });
+  html += '<button onclick="document.getElementById(\'menu-fond\').style.display=\'none\'" style="margin-top:8px;color:#888">Annuler</button>';
+  document.getElementById("menu").innerHTML = html;
+  document.getElementById("menu-fond").style.display = "flex";
+}
+
+function fusionnerVers(clSource, clCible) {
+  clCible = parseInt(clCible);
+  images.forEach(im => { if (im.classe == clSource) im.classe = clCible; });
+  document.getElementById("menu-fond").style.display = "none";
   render();
 }
 
@@ -397,11 +499,33 @@ function afficherLoupe() {
 }
 function naviguer(s) { loupeIdx = (loupeIdx + s + loupeListe.length) % loupeListe.length; afficherLoupe(); }
 function fermerLoupe() { document.getElementById("loupe").style.display = "none"; }
+
+function supprimerDepuisLoupe() {
+  // Supprime l'image affichee en grand sans revenir a la grille : reste dans la
+  // loupe sur l'image suivante de la meme classe, ou ferme si c'etait la derniere.
+  const id = loupeListe[loupeIdx];
+  if (id === undefined) return;
+  images = images.filter(im => im.id !== id);
+  selection.delete(id);
+  loupeListe = loupeListe.filter(x => x !== id);
+  render();
+  if (!loupeListe.length) { fermerLoupe(); return; }
+  loupeIdx = loupeIdx % loupeListe.length;
+  afficherLoupe();
+}
+
 document.addEventListener("keydown", e => {
-  if (document.getElementById("loupe").style.display !== "flex") return;
-  if (e.key === "ArrowLeft") naviguer(-1);
-  if (e.key === "ArrowRight") naviguer(1);
-  if (e.key === "Escape") fermerLoupe();
+  if (document.getElementById("loupe").style.display === "flex") {
+    if (e.key === "ArrowLeft") naviguer(-1);
+    if (e.key === "ArrowRight") naviguer(1);
+    if (e.key === "Escape") fermerLoupe();
+    if (e.key === "Delete") supprimerDepuisLoupe();
+    return;
+  }
+  // en dehors de la loupe : Suppr agit sur la selection en lot (pas si on tape dans un champ)
+  if (e.key === "Delete" && selection.size && document.activeElement.tagName !== "INPUT") {
+    supprimerSelection();
+  }
 });
 
 async function enregistrer() {

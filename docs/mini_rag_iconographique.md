@@ -11,7 +11,9 @@ local (Ollama).
 
 | Fichier | Rôle |
 |---|---|
-| `vector_base.ipynb` | Comparaison CLIP/DINOv2/SigLIP (précision 1-plus-proche-voisin, test de McNemar), fine-tuning léger de SigLIP, construction des bases vectorielles initiales (`bibles_siglip.pkl` 447, `ovide_bnu_corpus_siglip.pkl` 73), visualisation UMAP de proximité — **puis** extension de la base Ovide à **2191 illustrations / 28 éditions** (rapproche chaque dossier segmenté d'une ligne de la feuille `Synthèse` de `retours_celine/BNU_corpus.ods`) — **puis** ajout du thème précis planche par planche pour les 4 éditions à correspondance exacte (Solis, Salomon, Wickram, Savery — voir détail plus bas). Fusionné en un seul notebook (3 notebooks à l'origine, tous construisant/enrichissant la même base) → `ovide_corpus_complet_siglip.pkl` |
+| `selection_modele.ipynb` | Choix du modèle d'embedding — comparaison CLIP/DINOv2/SigLIP (précision 1-plus-proche-voisin, test de McNemar) puis fine-tuning léger de SigLIP (tête MLP, vérifié multi-graines). Notebook de R&D, pas ré-exécuté à chaque run du pipeline — conclusion retenue : SigLIP gelé |
+| `vector_base.ipynb` | Construction des bases vectorielles — Bibles (`bibles_siglip.pkl`, 447) et Ovide (73 illustrations thématisées, persistées à part pour `../comparaison_ovide_bibles/`) — **puis** extension de la base Ovide à **2191 illustrations / 28 éditions** (rapproche chaque dossier segmenté d'une ligne de la feuille `Synthèse` de `retours_celine/BNU_corpus.ods`) → `ovide_corpus_complet_siglip.pkl` |
+| `themes_precis.ipynb` | Thème précis planche par planche pour les 4 éditions à correspondance exacte (Solis, Salomon, Wickram, Savery — voir détail plus bas), enrichit `ovide_corpus_complet_siglip.pkl` |
 | `index_metadonnees.ipynb` | Second index vectoriel — embeddings texte (`multilingual-e5-small`) des métadonnées/descriptions, pour la recherche hybride (voir plus bas). Pour les 12 thèmes bibliques, `THEME_MOTS_CLES_BIBLE` ajoute des mots-clés narratifs (noms propres, objets) en plus du seul intitulé du thème |
 | `rag_generation.ipynb` | Retrieval (mécanique de recherche texte/image → SigLIP → cosinus, recherche hybride, démos texte EN/FR, sanity check leave-one-out) **et** génération (texte `llama3.2`, vision `qwen2.5vl`, prompts, démos) — fusionné avec l'ancien `retrieval.ipynb`, qui recopiait déjà ces mêmes fonctions |
 | `rag_utils.py` | Fonctions partagées (chargement des modèles/index, encodage, recherche, mise en forme du contexte), importées par `app_rag.py` **et** `rag_generation.ipynb` — même convention que `gallica_utils.py` (racine de `notebooks/`) : les fonctions `charger_*` retournent les objets chargés, les autres les prennent en paramètre explicite. Évite la duplication qui obligeait à corriger chaque bug à plusieurs endroits |
@@ -24,8 +26,9 @@ ouvrir dans un navigateur, pensé pour une présentation (ex. au tuteur de stage
 ### Ordre d'exécution
 
 ```
-vector_base.ipynb → index_metadonnees.ipynb
-rag_generation.ipynb (mecanique retrieval + generation, independant apres les 2 ci-dessus)
+selection_modele.ipynb (R&D, pas necessaire a chaque run)
+vector_base.ipynb → themes_precis.ipynb → index_metadonnees.ipynb
+rag_generation.ipynb (mecanique retrieval + generation, independant apres les 3 ci-dessus)
 app_rag.py (consomme tout, lance l'interface)
 ```
 
@@ -210,5 +213,15 @@ toutes ses fonctions — corriger un bug demandait de le faire dans les deux
 fichiers, plus maintenant). `vector_base_corpus_complet.ipynb` et
 `themes_precis_famille7.ipynb` ont été fusionnés dans `vector_base.ipynb` (les
 trois construisaient/enrichissaient progressivement la même base vectorielle
-Ovide, dans le même ordre séquentiel). 6 notebooks au départ → 2 aujourd'hui
+Ovide, dans le même ordre séquentiel). 6 notebooks au départ → 2 à cette étape
 (+ `index_metadonnees.ipynb` inchangé).
+
+**Étape suivante** : `vector_base.ipynb` était ensuite redevenu trop long pour
+une seule tâche — re-séparé en `selection_modele.ipynb` (choix du modèle,
+R&D), `vector_base.ipynb` (construction des bases, tâche principale) et
+`themes_precis.ipynb` (enrichissement des 4 éditions à correspondance exacte),
+chacun exécutable seul. La section visualisation UMAP de proximité Bibles/Ovide
+qui vivait dans `vector_base.ipynb` en a ensuite été retirée à son tour : elle
+ne fait pas partie du RAG (rien dans `rag_generation.ipynb` / `app_rag.py` n'en
+dépend), elle vit maintenant à part dans
+`../comparaison_ovide_bibles/comparaison_ovide_bibles.ipynb`.
