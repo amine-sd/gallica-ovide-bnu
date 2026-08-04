@@ -27,9 +27,38 @@ publication compterait deux ou trois fois.
 |---|---|
 | `01_carte_circulation.ipynb` | Carte Leaflet animée par un slider (1490-1750) — 19 villes, flèches de circulation (un graveur actif dans plusieurs villes) et flèches de copie (une édition copiant le travail d'un autre graveur). Frise et carte fusionnées : le slider fait avancer la carte dans le temps. |
 | `02_nuage_editions_villes.ipynb` | Trois cartes géographiques historiques empilées, une par ville (Venise, Paris, Lyon) — un nuage de points en spirale autour de chaque ville, un point par éditeur (ou par graveur, bouton bascule global) ayant publié dans cette ville, taille ∝ nombre d'éditions, couleur propre à chaque groupe. Tableau détaillé dépliable sous chaque carte. |
-| `03_reemploi_plaques.ipynb` | Frise SVG en couloirs, sur l'ensemble du corpus (19 villes) — une ligne par jeu de plaques gravées, un point par édition l'utilisant. Distingue réimpression par le même éditeur (trait neutre), transmission à un autre éditeur (flèche rouge) et cas incertain (pointillé, éditeur non identifié), plus les flèches de copie entre jeux de plaques différents (même logique que `01`, adaptée aux couloirs). Une ligne réunit en général ≥2 éditions réemployées ; quelques lignes "solo" (une seule édition) sont ajoutées uniquement pour ancrer une flèche de copie. Les éditions à graveur composite (plusieurs personnes citées dans la colonne graveur) sont écartées : pas d'identité de plaques unique à tracer. Pas de carte : question de filiation entre éditeurs dans le temps, pas de géographie. |
+| `03_reemploi_plaques.ipynb` | Frise SVG en couloirs, sur l'ensemble du corpus (19 villes) — une ligne par jeu de plaques gravées, un point par édition l'utilisant. Distingue réimpression par le même éditeur (trait neutre), transmission à un autre éditeur (flèche rouge) et cas incertain (pointillé, éditeur non identifié), plus les flèches de copie entre jeux de plaques différents (même logique que `01`, adaptée aux couloirs). Une ligne réunit en général ≥2 éditions réemployées ; quelques lignes "solo" (une seule édition) sont ajoutées uniquement pour ancrer une flèche de copie. Deux éditions du même graveur la même année sont empilées verticalement sur leur ligne plutôt que décalées horizontalement. Les éditions à graveur composite (plusieurs personnes citées dans la colonne graveur) sont écartées : pas d'identité de plaques unique à tracer. Pas de carte : question de filiation entre éditeurs dans le temps, pas de géographie. Export en lecture seule ; voir [Atelier de correction](#atelier-de-correction--réemploi-des-plaques) ci-dessous pour corriger l'ordre des lignes et les liens de copie. |
 | `04_reseau_editions.ipynb` | Graphe en réseau (D3.js, disposition par simulation de forces) sur l'ensemble du corpus — un nœud par édition (couleur = ville), un lien par relation entre deux éditions : réemploi de plaques (mêmes 3 types que `03`) et copies (même logique que `01`), combinés dans un seul graphe. Demandé pour rassembler en une vue ce que `01`-`03` traitent séparément, quitte à ce que ce soit dense. Abscisse = année (axe gradué), ordonnée libre (juste pour étaler les nœuds) : hybride entre graphe en réseau et frise chronologique. |
 | `05_vignette_plaques.ipynb` |  |
+
+## Atelier de correction — réemploi des plaques
+
+`03_reemploi_plaques.ipynb` s'appuie sur un module partagé, `reemploi_plaques_utils.py`
+(lecture du corpus, regroupement en jeux de plaques, résolution des flèches de copie,
+mise en page de la frise, génération du HTML) — le notebook ne fait plus qu'appeler ce
+module et écrire le résultat, en lecture seule (`editable=False`).
+
+Ce même module est utilisé par `reemploi_plaques_editeur.py`, un atelier web (Flask,
+`http://localhost:8060`, même principe que [l'atelier Bibles](corpus_bibles.md)) qui
+permet de corriger la visualisation directement, sans toucher `BNU_corpus.ods` :
+
+- **Ordre des lignes** — auto (jeux les plus réemployés d'abord, l'ordre par défaut),
+  alphabétique, chronologique (par date de la première édition de la série), ou un
+  ordre choisi librement via le panneau "Réordonner" (flèches ↑/↓ par ligne).
+- **Liens de copie** — bouton "Éditer les liens de copie" puis clic sur le point source
+  (l'édition qui copie) et sur le point cible (ce qu'elle copie) pour corriger ou
+  ajouter un lien ; clic sur une flèche de copie existante pour la supprimer. Utile
+  quand la résolution automatique (lecture de la colonne libre "copies de cette
+  édition") se trompe ou reste ambiguë — par exemple un lien affiché entre Tempesta
+  (1610) et Moncornet (1660) alors que c'est l'édition Moncornet de 1621 qui copie
+  réellement Tempesta.
+
+Chaque correction est enregistrée dans `retours_celine/corrections_reemploi_plaques.json`
+(jamais `BNU_corpus.ods`, qui reste la donnée source intacte) et recalcule la frise côté
+serveur, repoussée au navigateur sans recharger la page. Les liens ajoutés/corrigés à la
+main sont distingués visuellement (trait vert) des liens résolus automatiquement. Ce même
+fichier de corrections est relu par `03_reemploi_plaques.ipynb` : l'export statique reste
+cohérent avec ce qui a été corrigé dans l'atelier.
 
 ## Sorties
 
