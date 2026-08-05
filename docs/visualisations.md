@@ -29,7 +29,7 @@ publication compterait deux ou trois fois.
 | `02_nuage_editions_villes.ipynb` | Trois cartes géographiques historiques empilées, une par ville (Venise, Paris, Lyon) — un nuage de points en spirale autour de chaque ville, un point par éditeur (ou par graveur, bouton bascule global) ayant publié dans cette ville, taille ∝ nombre d'éditions, couleur propre à chaque groupe. Tableau détaillé dépliable sous chaque carte. |
 | `03_reemploi_plaques.ipynb` | Frise SVG en couloirs, sur l'ensemble du corpus (19 villes) — une ligne par jeu de plaques gravées, un point par édition l'utilisant. Distingue réimpression par le même éditeur (trait neutre), transmission à un autre éditeur (flèche rouge) et cas incertain (pointillé, éditeur non identifié), plus les flèches de copie entre jeux de plaques différents (même logique que `01`, adaptée aux couloirs). Une ligne réunit en général ≥2 éditions réemployées ; quelques lignes "solo" (une seule édition) sont ajoutées uniquement pour ancrer une flèche de copie. Deux éditions du même graveur la même année sont empilées verticalement sur leur ligne plutôt que décalées horizontalement. Les éditions à graveur composite (plusieurs personnes citées dans la colonne graveur) sont écartées : pas d'identité de plaques unique à tracer. Pas de carte : question de filiation entre éditeurs dans le temps, pas de géographie. Export en lecture seule ; voir [Atelier de correction](#atelier-de-correction--réemploi-des-plaques) ci-dessous pour corriger l'ordre des lignes et les liens de copie. |
 | `04_reseau_editions.ipynb` | Graphe en réseau (D3.js, disposition par simulation de forces) sur l'ensemble du corpus — un nœud par édition (couleur = ville), un lien par relation entre deux éditions : réemploi de plaques (mêmes 3 types que `03`) et copies (même logique que `01`), combinés dans un seul graphe. Demandé pour rassembler en une vue ce que `01`-`03` traitent séparément, quitte à ce que ce soit dense. Abscisse = année (axe gradué), ordonnée libre (juste pour étaler les nœuds) : hybride entre graphe en réseau et frise chronologique. |
-| `05_vignette_plaques.ipynb` |  |
+| `05_vignette_plaques.ipynb` | Cas d'étude ponctuel (pas tout le corpus, contrairement à `01`-`04`) : le jeu de plaques de Bernard Salomon (Lyon, 1557), repris à l'identique mais inversé en miroir par Virgil Solis (1563), réemployé dans de nombreuses éditions ultérieures. Vignette centrale (segmentée automatiquement, ou recadrée à la main quand la détection échoue) entourée en arc des pages qui la réemploient, chaque page affichée en ouverture de livre (folio + page en vis-à-vis, récupérée via l'API de pagination Gallica ou fournie directement pour MDZ). Cliquer une page recentre la vignette sur sa famille de plaques (Salomon ou Solis). |
 
 ## Atelier de correction — réemploi des plaques
 
@@ -104,4 +104,8 @@ contrairement aux trois autres notebooks, où toutes les positions sont calculé
 Python, un graphe en réseau n'a pas de position "naturelle" — la disposition est calculée
 dans le navigateur, au chargement de la page.
 
-`05_vignette_plaques.ipynb` 
+`05_vignette_plaques.ipynb` n'utilise ni Leaflet, ni MapLibre, ni D3 : une mise en page en
+arc calculée en Python (même principe géométrique que les couloirs de `03`), des images
+réencodées en base64 et intégrées directement dans le HTML — contrairement aux quatre
+premiers notebooks, purement vectoriels, celui-ci embarque les vignettes elles-mêmes
+(fichier plus lourd, ~3 Mo, mais toujours autonome).

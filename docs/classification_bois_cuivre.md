@@ -208,9 +208,7 @@ modeles/
 
 resultats/
 ├── csv/                              ← CSV bruts et enrichis (résultats de similarité, métriques)
-├── similarite/
-│   ├── Tableau_html/                 ← tableaux HTML de résultats de similarité
-│   └── Stats/                        ← figures (corpus similaires, stats globales)
+├── similarite/                       ← tableaux HTML et figures de résultats de similarité (à plat)
 ├── evaluation_modeles/bois_cuivre/   ← courbes, matrices de confusion, historique d'entraînement, trace du split (split_v4_editions.json)
 ├── Validation_cuivre_bois/
 │   ├── Validation_until_1800/        ← tableau de validation experte (corpus filtré)
