@@ -1,9 +1,7 @@
 # Visualisations
 
 Notebooks produisant chacun une visualisation spécifique et autonome (page HTML,
-consultable directement dans un navigateur) — par opposition aux pipelines de données
-des autres dossiers. Pas de fil conducteur unique entre les fichiers : chacun répond à
-une question ponctuelle, avec sa propre source et sa propre sortie.
+consultable directement dans un navigateur) .
 
 ## Circulation des éditions, des graveurs et des plaques
 
@@ -15,50 +13,15 @@ Source commune aux cinq notebooks : `retours_celine/BNU_corpus.ods` (feuille `Sy
 le tableau de référence documenté par Céline Bohnert (titre, ville, année, technique,
 graveur, éditeur, liens).
 
-Dans `01` à `04`, une même édition parfois scindée en plusieurs lignes "tome" dans le
-tableau source (même ville/année/éditeur/titre abrégé/graveur, un titre complet différent
-par tome) est fusionnée en une seule édition avant tout traitement (`fusionner_tomes()`,
-dupliquée à l'identique dans chacun des quatre notebooks) : sans cette fusion, une même
-publication compterait deux ou trois fois.
-
 ## Notebooks
 
 | Fichier | Rôle |
 |---|---|
 | `01_carte_circulation.ipynb` | Carte Leaflet animée par un slider (1490-1750) — 19 villes, flèches de circulation (un graveur actif dans plusieurs villes) et flèches de copie (une édition copiant le travail d'un autre graveur). Frise et carte fusionnées : le slider fait avancer la carte dans le temps. |
 | `02_nuage_editions_villes.ipynb` | Trois cartes géographiques historiques empilées, une par ville (Venise, Paris, Lyon) — un nuage de points en spirale autour de chaque ville, un point par éditeur (ou par graveur, bouton bascule global) ayant publié dans cette ville, taille ∝ nombre d'éditions, couleur propre à chaque groupe. Tableau détaillé dépliable sous chaque carte. |
-| `03_reemploi_plaques.ipynb` | Frise SVG en couloirs, sur l'ensemble du corpus (19 villes) — une ligne par jeu de plaques gravées, un point par édition l'utilisant. Distingue réimpression par le même éditeur (trait neutre), transmission à un autre éditeur (flèche rouge) et cas incertain (pointillé, éditeur non identifié), plus les flèches de copie entre jeux de plaques différents (même logique que `01`, adaptée aux couloirs). Une ligne réunit en général ≥2 éditions réemployées ; quelques lignes "solo" (une seule édition) sont ajoutées uniquement pour ancrer une flèche de copie. Deux éditions du même graveur la même année sont empilées verticalement sur leur ligne plutôt que décalées horizontalement. Les éditions à graveur composite (plusieurs personnes citées dans la colonne graveur) sont écartées : pas d'identité de plaques unique à tracer. Pas de carte : question de filiation entre éditeurs dans le temps, pas de géographie. Export en lecture seule ; voir [Atelier de correction](#atelier-de-correction--réemploi-des-plaques) ci-dessous pour corriger l'ordre des lignes et les liens de copie. |
+| `03_reemploi_plaques.ipynb` | Frise SVG en couloirs, sur l'ensemble du corpus (19 villes) — une ligne par jeu de plaques gravées, un point par édition l'utilisant. Distingue réimpression par le même éditeur (trait neutre), transmission à un autre éditeur (flèche rouge) et cas incertain (pointillé, éditeur non identifié), plus les flèches de copie entre jeux de plaques différents (même logique que `01`, adaptée aux couloirs). Une ligne réunit en général ≥2 éditions réemployées ; quelques lignes "solo" (une seule édition) sont ajoutées uniquement pour ancrer une flèche de copie. Deux éditions du même graveur la même année sont empilées verticalement sur leur ligne plutôt que décalées horizontalement. Les éditions à graveur composite (plusieurs personnes citées dans la colonne graveur) sont écartées : pas d'identité de plaques unique à tracer. |
 | `04_reseau_editions.ipynb` | Graphe en réseau (D3.js, disposition par simulation de forces) sur l'ensemble du corpus — un nœud par édition (couleur = ville), un lien par relation entre deux éditions : réemploi de plaques (mêmes 3 types que `03`) et copies (même logique que `01`), combinés dans un seul graphe. Demandé pour rassembler en une vue ce que `01`-`03` traitent séparément, quitte à ce que ce soit dense. Abscisse = année (axe gradué), ordonnée libre (juste pour étaler les nœuds) : hybride entre graphe en réseau et frise chronologique. |
 | `05_vignette_plaques.ipynb` | Cas d'étude ponctuel (pas tout le corpus, contrairement à `01`-`04`) : le jeu de plaques de Bernard Salomon (Lyon, 1557), repris à l'identique mais inversé en miroir par Virgil Solis (1563), réemployé dans de nombreuses éditions ultérieures. Vignette centrale (segmentée automatiquement, ou recadrée à la main quand la détection échoue) entourée en arc des pages qui la réemploient, chaque page affichée en ouverture de livre (folio + page en vis-à-vis, récupérée via l'API de pagination Gallica ou fournie directement pour MDZ). Cliquer une page recentre la vignette sur sa famille de plaques (Salomon ou Solis). |
-
-## Atelier de correction — réemploi des plaques
-
-`03_reemploi_plaques.ipynb` s'appuie sur un module partagé, `reemploi_plaques_utils.py`
-(lecture du corpus, regroupement en jeux de plaques, résolution des flèches de copie,
-mise en page de la frise, génération du HTML) — le notebook ne fait plus qu'appeler ce
-module et écrire le résultat, en lecture seule (`editable=False`).
-
-Ce même module est utilisé par `reemploi_plaques_editeur.py`, un atelier web (Flask,
-`http://localhost:8060`, même principe que [l'atelier Bibles](corpus_bibles.md)) qui
-permet de corriger la visualisation directement, sans toucher `BNU_corpus.ods` :
-
-- **Ordre des lignes** — auto (jeux les plus réemployés d'abord, l'ordre par défaut),
-  alphabétique, chronologique (par date de la première édition de la série), ou un
-  ordre choisi librement via le panneau "Réordonner" (flèches ↑/↓ par ligne).
-- **Liens de copie** — bouton "Éditer les liens de copie" puis clic sur le point source
-  (l'édition qui copie) et sur le point cible (ce qu'elle copie) pour corriger ou
-  ajouter un lien ; clic sur une flèche de copie existante pour la supprimer. Utile
-  quand la résolution automatique (lecture de la colonne libre "copies de cette
-  édition") se trompe ou reste ambiguë — par exemple un lien affiché entre Tempesta
-  (1610) et Moncornet (1660) alors que c'est l'édition Moncornet de 1621 qui copie
-  réellement Tempesta.
-
-Chaque correction est enregistrée dans `retours_celine/corrections_reemploi_plaques.json`
-(jamais `BNU_corpus.ods`, qui reste la donnée source intacte) et recalcule la frise côté
-serveur, repoussée au navigateur sans recharger la page. Les liens ajoutés/corrigés à la
-main sont distingués visuellement (trait vert) des liens résolus automatiquement. Ce même
-fichier de corrections est relu par `03_reemploi_plaques.ipynb` : l'export statique reste
-cohérent avec ce qui a été corrigé dans l'atelier.
 
 ## Sorties
 
@@ -93,19 +56,3 @@ un navigateur.
 - HTML/CSS/JS "vanilla" — pas de framework front ; toute l'interaction (slider, lecture
   ▶/⏸, réglage de vitesse, mise à jour des flèches et marqueurs) est écrite à la main dans
   le template Python de la cellule de génération
-
-`03_reemploi_plaques.ipynb` n'utilise ni Leaflet ni MapLibre : pas de question géographique,
-juste une frise en SVG pur (générée en Python, même principe que la frise fusionnée à la
-carte de `01_carte_circulation.ipynb`) et le même HTML/CSS/JS "vanilla" pour l'interaction.
-
-`04_reseau_editions.ipynb` introduit [D3.js](https://d3js.org/) v7 (`d3-force` pour la
-disposition du graphe par simulation physique, `d3-drag` et `d3-zoom` pour l'interaction) :
-contrairement aux trois autres notebooks, où toutes les positions sont calculées à l'avance en
-Python, un graphe en réseau n'a pas de position "naturelle" — la disposition est calculée
-dans le navigateur, au chargement de la page.
-
-`05_vignette_plaques.ipynb` n'utilise ni Leaflet, ni MapLibre, ni D3 : une mise en page en
-arc calculée en Python (même principe géométrique que les couloirs de `03`), des images
-réencodées en base64 et intégrées directement dans le HTML — contrairement aux quatre
-premiers notebooks, purement vectoriels, celui-ci embarque les vignettes elles-mêmes
-(fichier plus lourd, ~3 Mo, mais toujours autonome).

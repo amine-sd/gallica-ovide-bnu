@@ -16,17 +16,14 @@ local (Ollama).
 | `themes_precis.ipynb` | Thème précis planche par planche pour les 4 éditions à correspondance exacte (Solis, Salomon, Wickram, Savery — voir détail plus bas), enrichit `ovide_corpus_complet_siglip.pkl` |
 | `index_metadonnees.ipynb` | Second index vectoriel — embeddings texte (`multilingual-e5-small`) des métadonnées/descriptions, pour la recherche hybride (voir plus bas). Pour les 12 thèmes bibliques, `THEME_MOTS_CLES_BIBLE` ajoute des mots-clés narratifs (noms propres, objets) en plus du seul intitulé du thème |
 | `rag_generation.ipynb` | Retrieval (mécanique de recherche texte/image → SigLIP → cosinus, recherche hybride, démos texte EN/FR, sanity check leave-one-out) **et** génération (texte `llama3.2`, vision `qwen2.5vl`, prompts, démos) — fusionné avec l'ancien `retrieval.ipynb`, qui recopiait déjà ces mêmes fonctions |
-| `rag_utils.py` | Fonctions partagées (chargement des modèles/index, encodage, recherche, mise en forme du contexte), importées par `app_rag.py` **et** `rag_generation.ipynb` — même convention que `gallica_utils.py` (racine de `notebooks/`) : les fonctions `charger_*` retournent les objets chargés, les autres les prennent en paramètre explicite. Évite la duplication qui obligeait à corriger chaque bug à plusieurs endroits |
+| `rag_utils.py` | Fonctions partagées (chargement des modèles/index, encodage, recherche, mise en forme du contexte), importées par `app_rag.py` **et** `rag_generation.ipynb` — même convention que `gallica_utils.py` (racine de `notebooks/`) : les fonctions `charger_*` retournent les objets chargés, les autres les prennent en paramètre explicite. |
 | `app_rag.py` | Application de démo (Gradio, façon ChatGPT) — voir "Lancer l'appli" plus bas |
 
-**Schéma d'architecture** : [`resultats/mini_rag_iconographique/architecture_rag.html`](../resultats/mini_rag_iconographique/architecture_rag.html)
-— pipeline explicatif en 2 phases (construction de la base / requête en direct), à
-ouvrir dans un navigateur, pensé pour une présentation (ex. au tuteur de stage).
 
 ### Ordre d'exécution
 
 ```
-selection_modele.ipynb (R&D, pas necessaire a chaque run)
+selection_modele.ipynb 
 vector_base.ipynb → themes_precis.ipynb → index_metadonnees.ipynb
 rag_generation.ipynb (mecanique retrieval + generation, independant apres les 3 ci-dessus)
 app_rag.py (consomme tout, lance l'interface)
@@ -176,52 +173,3 @@ concrètement les deux approches sur la même requête.
   argent comptant sans vérification, même quand l'identification globale du
   sujet est correcte.
 
-## Historique — itérations du prompt système vision
-
-Cinq formulations testées empiriquement (mêmes images récupérées, requêtes
-*"editions imprimees a Lyon"* et *"Cadmus combat un serpent"*, 2-3 répétitions
-par version pour limiter le bruit de la non-déterminisme) avant de retenir la
-version actuelle (V5, dans `app_rag.py` et `rag_generation.ipynb`) :
-
-| Version | Piste testée | Résultat |
-|---|---|---|
-| V1 (initiale) | baseline | Bon équilibre général, mais hallucine parfois un nom sur une illustration sans métadonnée (ex. *"probablement Diane"*) et sous-exploite parfois un `theme_precis` pourtant fiable |
-| V2 | distinguer explicitement observation vs métadonnées | N'empêche pas l'hallucination sur les cas sans métadonnée ; pas d'amélioration nette |
-| V3 | structurer la réponse en 2 parties (description / identification) | Corrige bien le cas "sans métadonnée", mais devient trop prudent même quand la métadonnée est fiable (marque des cas confirmés comme "incertains") |
-| V4 | "si SA PROPRE métadonnée le nomme, utilise-le sans hésiter ; sinon ne l'invente pas" | Corrige la sous-exploitation des `theme_precis` confirmés ; révèle un nouveau problème — la contamination inter-images (voir Limites connues) |
-| **V5 (retenue)** | V4 + consigne explicite "chaque image a SA PROPRE métadonnée, distincte des autres images du lot et de la requête" | Réduit la contamination sur une des deux images-pièges testées, aucun effet mesurable sur l'autre — amélioration partielle, limite documentée ci-dessus |
-
-## Historique — bug d'exécution nbconvert (résolu)
-
-`retrieval.ipynb` et `rag_generation.ipynb` avaient chacun 2 cellules dont la
-sortie n'était pas enregistrée lors d'un `nbconvert --execute`, malgré une
-exécution apparemment correcte dans le kernel. Cause réelle, identifiée en
-branchant le filtre de correspondance exacte (ci-dessus) : une fusion de
-cellules antérieure avait déplacé un appel de démo (`afficher_grille(...)`,
-`generer_reponse_rag_vision(...)`) dans une cellule placée **avant** la
-définition de ces fonctions plus loin dans le notebook — une vraie
-`NameError`, masquée à l'époque par une inspection incomplète de la sortie
-d'erreur. Corrigé en séparant les définitions (restées en place) des appels de
-démo (déplacés en fin de notebook, après tout ce dont ils dépendent) — les
-deux notebooks s'exécutent maintenant intégralement via `nbconvert --execute`
-avec un `execution_count` séquentiel sur toutes les cellules.
-
-## Historique — fusion des notebooks (réduction du nombre de fichiers)
-
-`retrieval.ipynb` a été fusionné dans `rag_generation.ipynb` (qui recopiait déjà
-toutes ses fonctions — corriger un bug demandait de le faire dans les deux
-fichiers, plus maintenant). `vector_base_corpus_complet.ipynb` et
-`themes_precis_famille7.ipynb` ont été fusionnés dans `vector_base.ipynb` (les
-trois construisaient/enrichissaient progressivement la même base vectorielle
-Ovide, dans le même ordre séquentiel). 6 notebooks au départ → 2 à cette étape
-(+ `index_metadonnees.ipynb` inchangé).
-
-**Étape suivante** : `vector_base.ipynb` était ensuite redevenu trop long pour
-une seule tâche — re-séparé en `selection_modele.ipynb` (choix du modèle,
-R&D), `vector_base.ipynb` (construction des bases, tâche principale) et
-`themes_precis.ipynb` (enrichissement des 4 éditions à correspondance exacte),
-chacun exécutable seul. La section visualisation UMAP de proximité Bibles/Ovide
-qui vivait dans `vector_base.ipynb` en a ensuite été retirée à son tour : elle
-ne fait pas partie du RAG (rien dans `rag_generation.ipynb` / `app_rag.py` n'en
-dépend), elle vit maintenant à part dans
-`../comparaison_ovide_bibles/comparaison_ovide_bibles.ipynb`.

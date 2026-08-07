@@ -3,10 +3,7 @@ rag_utils.py — Fonctions partagees pour le mini RAG iconographique (Ovide / Bi
 =====================================================================================
 Usage : from rag_utils import charger_siglip, charger_e5, charger_index, embed_texte, ...
 
-Meme convention que gallica_utils.py (racine de notebooks/) : les fonctions de
-chargement (charger_*) retournent les objets charges, les autres fonctions les
-prennent en parametre explicite plutot que de dependre de variables globales —
-chaque notebook/script reste libre de charger une seule fois et de reutiliser.
+
 """
 
 import re
@@ -47,10 +44,7 @@ def charger_siglip(device):
 
 
 def charger_e5():
-    """Modele dedie a la similarite texte-texte (metadonnees/descriptions) :
-    SigLIP seul donnait de mauvais resultats ici (ex. "Cadmus combat un
-    serpent" faisait remonter un document Cain et Abel avant le bon document)
-    car il n'est entraine que pour comparer image<->texte, jamais texte<->texte."""
+    """Modele dedie a la similarite texte-texte (metadonnees/descriptions)."""
     from sentence_transformers import SentenceTransformer
     return SentenceTransformer(NOM_MODELE_E5)
 

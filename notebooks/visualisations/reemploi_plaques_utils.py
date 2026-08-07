@@ -1,6 +1,6 @@
 """
 reemploi_plaques_utils.py — logique partagée entre `03_reemploi_plaques.ipynb`
-(export statique) et `reemploi_plaques_editeur.py` (atelier d'édition local).
+(export statique) et `reemploi_plaques_editeur.py`.
 
 Convention du projet (voir gallica_utils.py, rag_utils.py) : les fonctions de
 chargement retournent les objets chargés, les autres les prennent en paramètre
@@ -35,15 +35,7 @@ LARGEUR = 2600
 MARGE = {"gauche": 210, "droite": 20, "haut": 30, "bas": 36}
 HAUTEUR_LIGNE = 24
 RAYON_POINT = 6
-PAS_EMPILEMENT = RAYON_POINT * 2 + 16  # séparation verticale entre points empilés (même année)
-# Séparation horizontale minimale entre deux points d'années différentes sur une même ligne :
-# un "bonus" d'espace qui vaut ECART_PLANCHER quand l'écart naturel (à l'échelle globale de
-# la frise) est quasi nul, et qui s'annule progressivement à mesure que l'écart naturel
-# grandit (ECART_DEMIVIE = l'écart, en px, où le bonus est retombé à moitié) — deux éditions
-# à un an d'écart et deux éditions à trois ans d'écart, toutes deux "collées" à l'échelle
-# globale, reçoivent chacune un bonus DIFFÉRENT (proportionnellement au premier), plutôt que
-# d'être aplaties à la même distance minimale ; les éditions déjà bien espacées ne sont
-# quasiment pas affectées, pour ne pas fausser la lecture chronologique d'ensemble.
+PAS_EMPILEMENT = RAYON_POINT * 2 + 16  
 ECART_PLANCHER = 45
 ECART_DEMIVIE = 50
 

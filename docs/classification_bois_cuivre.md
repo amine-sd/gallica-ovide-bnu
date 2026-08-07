@@ -1,10 +1,10 @@
 # Classification bois / cuivre
 
-Classifieur ResNet50 binaire — distingue gravure sur bois (xylographie) et gravure
-sur cuivre (taille-douce) parmi les illustrations segmentées des *Métamorphoses*
+Classifieur ResNet50 binaire — distingue gravure sur bois et gravure
+sur cuivre parmi les illustrations segmentées des *Métamorphoses*
 d'Ovide.
 
-**Axe clôturé** — versions finales retenues : **v4.0.0** et **v4.1.1** (voir plus bas).
+Versions finales retenues : **v4.0.0** et **v4.1.1** (voir plus bas).
 
 ---
 
@@ -18,10 +18,6 @@ d'Ovide.
 | `04_validation_experte.ipynb` | Génère les tableaux HTML de validation soumis à Céline Bohnert |
 | `05_evaluation_versions.ipynb` | Compare toutes les versions face aux annotations de Céline — **évaluation de référence** |
 
-`validation_bnf_etiquete.ipynb` (validation externe sur corpus BnF étiqueté) reste dans
-ce dossier mais hors du pipeline principal — méthode gardée à titre exploratoire mais
-écartée comme référence (métadonnée technique BnF peu fiable, corpus instable d'un run
-à l'autre).
 
 ### Ordre d'exécution
 
@@ -45,9 +41,7 @@ Changer `VERSION` et `STRATEGIE` dans la cellule de configuration :
 - `STRATEGIE = "simple"` — entraînement en une passe, réseau dégelé dès le départ (utilisé pour v1/v2).
 - `STRATEGIE = "deux_etapes"` — couche finale puis réseau complet (ou `layer4`+`fc` seulement si `DEGEL_ETAPE2="layer4"`), early stopping (utilisé pour v3/v4).
 
-Ce notebook remplace les anciens `02_entrainement_v1_v2.ipynb` et
-`03_entrainement_v3.ipynb`, qui dupliquaient la même logique de chargement dataset /
-class weights / évaluation.
+
 
 ### Ajouter une version au tableau enrichi (`03_application_modeles.ipynb`)
 Ajouter le chemin du nouveau `.pth` dans le dictionnaire `MODELES`. Les colonnes et
@@ -129,7 +123,7 @@ réelles indépendantes. Corrigé en v4 (voir ci-dessous).
 
 **Ce qui distingue les trois variantes (étape 2 du fine-tuning uniquement)** :
 
-| Version | Étape 2 | Test interne (split honnête) |
+| Version | Étape 2 | Test interne |
 |---|---|---|
 | `resnet50_bois_cuivre_v4.0.0.pth` | Réseau complet dégelé, `LR=1e-4`, pas de weight_decay | **98.3 %** (F1 ≈ 0.98) |
 | `resnet50_bois_cuivre_v4.1.0.pth` | Réseau complet dégelé, `LR=5e-5`, `weight_decay=1e-4` | 96.6 % — moins bon, écarté |
@@ -173,14 +167,7 @@ Conservée dans `modeles/bois_cuivre/` à titre de comparaison, non retenue.
 sources visuelles indépendantes** (`bois_solis_feyerabend_francfort1581` est une
 copie en miroir de `bois_salomon_rouille_lyon1557` — pratique de copie de gravure
 documentée) sur les 5 éditions disponibles. Toute évaluation sur du bois totalement
-hors du corpus Ovide doit être interprétée avec cette réserve. Le corpus BnF
-étiqueté (`validation_bnf_etiquete.ipynb`, ce dossier) donnait des résultats
-bien plus bas et instables d'un run à l'autre (~60-70 %, l'échantillon change à
-chaque téléchargement) — et son champ `properties_technical_process` s'est aussi
-révélé peu fiable à l'inspection visuelle (images étiquetées "bois" ne ressemblant
-pas à des gravures). Ces chiffres externes sont donc à prendre avec prudence ;
-l'évaluation la plus fiable reste celle basée sur les annotations manuelles de
-Céline ci-dessus.
+hors du corpus Ovide doit être interprétée avec cette réserve. 
 
 **Axe clôturé sur cette base** — v4.0.0 et v4.1.1 sont les deux candidats retenus, à
 choisir selon la priorité (rappel vs précision) du cas d'usage.
@@ -263,9 +250,3 @@ et les lignes plus épaisses de la taille de bois.
 
 ---
 
-## Note mémoire GPU
-
-YOLO (`01_dataset.ipynb`) et ResNet50 (`02_entrainement.ipynb`,
-`03_application_modeles.ipynb`) ne peuvent pas coexister en mémoire GPU. Appeler
-`liberer_yolo()` en fin de segmentation. Si une erreur OOM (*Out Of Memory*)
-survient, faire **Kernel → Restart**.

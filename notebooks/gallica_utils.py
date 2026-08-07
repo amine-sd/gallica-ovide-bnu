@@ -155,9 +155,6 @@ def liberer_yolo(modele_yolo):
     Libère la mémoire GPU occupée par le modèle YOLO.
     À appeler avant de charger ResNet50.
 
-    Exemple
-    -------
-    modele_yolo = liberer_yolo(modele_yolo)
     """
     del modele_yolo
     torch.cuda.empty_cache()
@@ -184,13 +181,7 @@ def telecharger_pages_iiif(manifest_url, dossier_sortie,
     prefixe       : str   — préfixe pour nommer les fichiers (défaut "page")
     pause         : float — délai entre requêtes en secondes (défaut 0.05)
 
-    Exemple
-    -------
-    pages = telecharger_pages_iiif(
-        "https://api.digitale-sammlungen.de/iiif/presentation/v2/bsb10863401/manifest",
-        "images_brutes/cuivre_munich",
-        prefixe="munich"
-    )
+
     """
     os.makedirs(dossier_sortie, exist_ok=True)
 
@@ -375,9 +366,6 @@ def charger_resnet(chemin_pth, device=None):
     chemin_pth : str            — chemin vers le fichier .pth
     device     : torch.device   — CPU ou CUDA (auto-détecté si None)
 
-    Exemple
-    -------
-    modele = charger_resnet("modeles/resnet50_bois_cuivre_v3.pth")
     """
     if device is None:
         device = DEVICE
@@ -403,9 +391,7 @@ def predire_technique(url, modele, device=None):
     modele : model — ResNet50 chargé via charger_resnet()
     device : torch.device — CPU ou CUDA (auto-détecté si None)
 
-    Exemple
-    -------
-    classe, conf = predire_technique(row["link"], modele_v3)
+
     """
     if device is None:
         device = DEVICE
@@ -435,9 +421,7 @@ def appliquer_modele_df(df, modele, col_classe, col_conf, device=None):
     col_conf  : str       — nom de la colonne pour la confiance
     device    : torch.device
 
-    Exemple
-    -------
-    df = appliquer_modele_df(df, modele_v3, "technique_ia_v3", "technique_ia_conf_v3")
+
     """
     if device is None:
         device = DEVICE
@@ -473,9 +457,6 @@ def generer_tableau_html(df, nom_fichier, colonnes_ia=None, port=8085):
                                 ex: ["v1", "v2", "v3"] ou None pour aucune
     port          : int       — port du serveur local (défaut 8085)
 
-    Exemple
-    -------
-    generer_tableau_html(df, "resultats/tableau.html", colonnes_ia=["v1","v2","v3"])
     """
     if colonnes_ia is None:
         colonnes_ia = []

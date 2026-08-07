@@ -33,8 +33,6 @@ recuperation_bsb.ipynb → galerie_tri_bibles.ipynb → test_clusters_bibles.ipy
    `data/bibles_mdz/classes_celine/` — c'est à la fois la sauvegarde et le point de
    reprise de la session suivante.
 
-`galerie_bibles.py` est un outil de tri plus ancien, logique inversée (on coche ce
-qu'on supprime, pas ce qu'on garde) — largement supersedé par `galerie_tri_bibles.ipynb`.
 
 ## État actuel
 
@@ -54,4 +52,3 @@ Bibles dans la base vectorielle du mini RAG (voir `../mini_rag_iconographique/`)
 | `galerie_tri_bibles.ipynb` | Tri visuel (garder/écarter), backup puis nettoyage |
 | `test_clusters_bibles.ipynb` | Test exploratoire de granularité de clustering (CLIP + K-Means) |
 | `atelier_regroupement.py` | Atelier web — classification finale par thème, source de vérité |
-| `galerie_bibles.py` | Outil de tri plus ancien (logique inversée), superseded par `galerie_tri_bibles.ipynb` |

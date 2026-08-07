@@ -1,6 +1,6 @@
 # Classification par graveur
 
-**Axe en cours.** Objectif : identifier le graveur d'une illustration (au-delà de la
+Objectif : identifier le graveur d'une illustration (au-delà de la
 seule distinction bois/cuivre traitée dans `../classification_bois_cuivre/`).
 
 ## Constitution du dataset

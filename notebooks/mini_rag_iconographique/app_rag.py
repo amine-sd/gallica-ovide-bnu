@@ -12,8 +12,7 @@ Lancement :
 
 Necessite Ollama demarre (`ollama serve`) avec les deux modeles deja telecharges
 (`ollama pull qwen2.5vl`, `ollama pull llama3.2`). Avec share=True, un lien public
-temporaire (72h) est imprime dans le terminal (gradio.live) — c'est ce lien qu'il
-faut envoyer au tuteur.
+temporaire (72h) est imprime dans le terminal (gradio.live).
 """
 
 import base64

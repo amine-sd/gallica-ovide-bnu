@@ -1,7 +1,6 @@
 # Comparaison Ovide / Bibles — proximité par embeddings
 
-Analyse à part, extraite de `mini_rag_iconographique/vector_base.ipynb` : ne fait pas
-partie du RAG (rien dans `rag_generation.ipynb` / `app_rag.py` n'en dépend). Question posée :
+Question posée :
 l'iconographie d'Ovide (créations du monde/de l'homme, déluge) "retombe"-t-elle
 visuellement sur les mêmes thèmes du côté des Bibles, ou sur des thèmes différents ?
 
@@ -15,7 +14,7 @@ Bibles sont regroupées sous les 3 thèmes partagés avec Ovide), la forme encod
 
 Deux mesures de correspondance, dans les deux sens : pour chaque illustration Ovide, sa
 meilleure correspondance Bible (n'importe quel thème) — et inversement. Une vérification
-par *trustworthiness* confirme que la projection 2D reflète bien la proximité réelle en
+par *trustworthiness* confirme que la projection 2D reflète bien la proximité réelle en"
 768D (dernier run : 0,93 — proche de 1,0 = parfait), pas un artefact de mise en page.
 
 ## Prérequis
@@ -32,13 +31,13 @@ par *trustworthiness* confirme que la projection 2D reflète bien la proximité 
 | Fichier | Rôle |
 |---|---|
 | `comparaison_ovide_bibles.ipynb` | Projection UMAP, correspondances Ovide↔Bible, export HTML interactif, vérification trustworthiness |
+| `comparaison_par_theme.ipynb` | Complément — même comparaison mais par thème partagé (petits multiples UMAP un par thème + galerie de paires Ovide/Bible côte à côte), exclut les illustrations bibliques sans thème Ovide équivalent |
 
 ## Sortie
 
 [`resultats/comparaison_ovide_bibles/proximite_bibles_ovide.html`](../resultats/comparaison_ovide_bibles/proximite_bibles_ovide.html)
 — page autonome, à ouvrir dans un navigateur (survol = image en grand, clic sur un point =
 isoler ses liens, curseur de seuil de similarité, mode comparaison jusqu'à 4 images).
-D3.js est **embarqué directement dans le HTML** (depuis `lib/d3.v7.min.js`) plutôt que
-chargé depuis un CDN — la page fonctionne donc sans connexion internet et n'est pas
-affectée par un navigateur qui bloquerait le chargement de scripts distants sur une page
-ouverte en local (`file://`), ce qui a été observé en pratique.
+
+[`resultats/comparaison_ovide_bibles/comparaison_par_theme.html`](../resultats/comparaison_ovide_bibles/comparaison_par_theme.html)
+— sortie de `comparaison_par_theme.ipynb` (petits multiples par thème + galerie de paires).

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Atelier de regroupement des illustrations de Bibles — pour Céline (v3).
+Atelier de regroupement des illustrations de Bibles.
 
 Source de vérité = le dossier  data/bibles_mdz/classes_celine/  :
 chaque sous-dossier = une classe (nom = nom du dossier), avec ses images.

@@ -30,8 +30,8 @@ notebooks/
 ├── gallica_utils.py                     ← fonctions partagées (voir ci-dessus)
 │
 ├── documentation_similarite_salomon/    ← recherche par similarité d'image (corpus Salomon)
-├── classification_bois_cuivre/          ← classifieur ResNet50 bois / cuivre — axe clôturé
-├── classification_graveur/              ← classification par graveur — en cours
+├── classification_bois_cuivre/          ← classifieur ResNet50 bois / cuivre 
+├── classification_graveur/              ← classification par graveur 
 ├── corpus_bibles/                       ← récupération, tri et classification par thème des Bibles (BSB/MDZ)
 ├── mini_rag_iconographique/             ← mini RAG iconographique (recherche + génération) — exploratoire
 ├── comparaison_ovide_bibles/             ← proximité par embeddings (UMAP) — à part du RAG
@@ -46,7 +46,7 @@ notebooks/
   versions finales, voir sa fiche dans `docs/` pour le détail technique complet et
   l'historique des versions (v1 à v4.1.1).
 - **[`classification_graveur/`](../docs/classification_graveur.md)** —
-  classification par graveur, axe en cours (constitution du dataset).
+  classification par graveur, axe en cours.
 - **[`corpus_bibles/`](../docs/corpus_bibles.md)** — récupération de Bibles illustrées
   depuis BSB/MDZ, tri visuel, puis classification par thème iconographique (atelier
   web) : le corpus Bibles utilisé par `mini_rag_iconographique/`.
@@ -76,8 +76,4 @@ base commune plutôt que de la dupliquer chacun de leur côté.
 
 ---
 
-## Note mémoire GPU (générale)
 
-YOLO et ResNet50 ne peuvent pas coexister en mémoire GPU dans le même notebook.
-Appeler `liberer_yolo()` (voir `gallica_utils.py`) avant de charger un modèle
-ResNet50. Si une erreur OOM (*Out Of Memory*) survient, faire **Kernel → Restart**.
