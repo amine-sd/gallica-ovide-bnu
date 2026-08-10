@@ -11,9 +11,6 @@ resultats/Validation_cuivre_bois/*/galeries*/
 # ── Retours de validation (Céline) ────────────────────────────
 retours_celine/
 
-# ── Cache de pages téléchargées (notebooks/visualisations/05) ─
-notebooks/visualisations/cache_visu5_pages/
-notebooks/visualisations/cache_visu5_vignettes/
 
 # ── YOLOv5 — dépendance externe, à cloner séparément ─────────
 yolov5_repo/
