@@ -99,6 +99,7 @@ working_dir/
 ├── modeles/            ← poids des modèles entraînés (.pth) — exclus de Git
 ├── resultats/          ← CSV, tableaux HTML de validation, visualisations, métriques
 ├── retours_celine/     ← annotations de validation expertes — exclu de Git
+├── deploiement_hf/     ← publication du classifieur bois/cuivre sur Hugging Face
 └── yolov5_repo/        ← dépendance externe (segmentation), à cloner séparément
 ```
 
