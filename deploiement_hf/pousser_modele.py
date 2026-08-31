@@ -26,7 +26,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from modele_hf import ClassifieurBoisCuivre, LABELS
 
 # ──────────────────────────────────────────────────────
-COMPTE = "Spakalao"                    # identifiant Hugging Face
+COMPTE = "amine-sd"                    # identifiant Hugging Face
 NOM    = "resnet50-gravure-bois-cuivre"
 PRIVE  = True                          # dépôt privé — basculer en public depuis les
                                        # réglages du dépôt une fois la relecture faite

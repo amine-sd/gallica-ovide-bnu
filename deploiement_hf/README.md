@@ -3,7 +3,7 @@
 Fichiers ayant servi à publier le modèle ResNet50 bois/cuivre sur le Hub, et permettant de
 le republier ou de le mettre à jour.
 
-**Dépôt publié** : [`Spakalao/resnet50-gravure-bois-cuivre`](https://huggingface.co/Spakalao/resnet50-gravure-bois-cuivre)
+**Dépôt publié** : [`amine-sd/resnet50-gravure-bois-cuivre`](https://huggingface.co/amine-sd/resnet50-gravure-bois-cuivre)
 
 | Fichier | Rôle |
 |---|---|
