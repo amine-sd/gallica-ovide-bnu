@@ -76,7 +76,8 @@ Bibliothèque nationale et universitaire de Strasbourg, dans le cadre de ma form
 d'ingénieur à l'ENSICAEN (parcours ISIA — Image, Son et Intelligence Artificielle).
 
 Le stage s'inscrit dans la résidence de recherche *« Ovide en images à la BNU : de l'imprimé
-ancien à la donnée »*, menée par une équipe pluridisciplinaire :
+ancien à la donnée »*, menée en partenariat avec la Bibliothèque nationale de France par une
+équipe pluridisciplinaire :
 
 - **Céline Bohnert** — maîtresse de conférences (CRIMEL, Université de Reims
   Champagne-Ardenne), chercheuse en résidence : porteuse des questions scientifiques et
